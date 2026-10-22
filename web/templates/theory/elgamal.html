@@ -1,0 +1,157 @@
+{% extends "theory_base.html" %}
+
+{% block article %}
+<p class="lead">
+    Шифр Эль-Гамаля (Тахер Эль-Гамаль, 1985) — асимметричный шифр: зашифровать сообщение может кто угодно по открытому
+    ключу, а расшифровать — только владелец секретного ключа. Его стойкость основана на трудности задачи дискретного
+    логарифма, а по устройству он — прямое продолжение протокола Диффи–Хеллмана.
+</p>
+
+<h2>Зачем нужна асимметричная криптография</h2>
+<p>
+    У <a href="{{ root }}/theory/classical-ciphers">симметричных шифров</a> один ключ на двоих, и его нужно как-то доставить
+    собеседнику. Для сети из <span class="f">n</span> участников нужно <span class="f">n(n − 1)/2</span> секретных ключей и надёжные каналы для каждого.
+    В 1976 году Уитфилд Диффи и Мартин Хеллман предложили другой подход: у каждого участника пара ключей — открытый,
+    который публикуется, и секретный, который никому не передаётся. Вычислить секретный ключ по открытому должно быть
+    практически невозможно.
+</p>
+
+<h2>Задача дискретного логарифма</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        Пусть <span class="f">p</span> — простое, <span class="f">g</span> — <a href="{{ root }}/theory/residues">первообразный корень</a> по модулю <span class="f">p</span>.
+        <b>Дискретный логарифм</b> числа <span class="f">y</span> — такое <span class="f">x</span>, что <span class="f">g^x ≡ y (mod p)</span>.
+    </p>
+</div>
+<p>
+    Вычислить <span class="f">y = g^x mod p</span> легко: <a href="{{ root }}/theory/congruences">быстрое возведение в степень</a> требует около
+    <span class="f">2·log₂ x</span> умножений. Обратная задача — найти <span class="f">x</span> по <span class="f">y</span> — для больших <span class="f">p</span> считается трудной.
+    Метод «шаг младенца — шаг великана» решает её за <span class="f">O(√p)</span> операций, лучшие известные алгоритмы (решето числового поля)
+    — за субэкспоненциальное время, но для <span class="f">p</span> из 2048 бит и это недостижимо. Такие функции — лёгкие в одну сторону
+    и трудные в обратную — называют <b>односторонними</b>.
+</p>
+
+<h2>Протокол Диффи–Хеллмана</h2>
+<ol>
+    <li>Алиса и Боб открыто договариваются о <span class="f">p</span> и <span class="f">g</span>.</li>
+    <li>Алиса выбирает секретное <span class="f">a</span> и отправляет <span class="f">A = g^a mod p</span>; Боб выбирает секретное <span class="f">b</span> и отправляет <span class="f">B = g^b mod p</span>.</li>
+    <li>Алиса вычисляет <span class="f">B^a</span>, Боб — <span class="f">A^b</span>. Оба получают общий секрет <span class="f">K = g^(ab) mod p</span>.</li>
+</ol>
+<p>
+    Противник видит <span class="f">p, g, A, B</span>, но чтобы найти <span class="f">g^(ab)</span>, ему, по-видимому, нужно решить задачу дискретного логарифма.
+</p>
+
+<h2>Схема Эль-Гамаля</h2>
+<p>Шифр Эль-Гамаля — это Диффи–Хеллман, в котором «половинка» получателя опубликована заранее, а общий секрет служит маской для сообщения.</p>
+<div class="box definition">
+    <span class="box-title">Генерация ключей</span>
+    <p>
+        Выбрать большое простое <span class="f">p</span> и первообразный корень <span class="f">g</span>; выбрать секретный ключ <span class="f">x</span>, <span class="f">1 &lt; x &lt; p − 1</span>;
+        вычислить <span class="f">y = g^x mod p</span>. <b>Открытый ключ</b> — <span class="f">(p, g, y)</span>, <b>секретный</b> — <span class="f">x</span>.
+    </p>
+</div>
+<div class="box definition">
+    <span class="box-title">Шифрование сообщения 0 &lt; M &lt; p</span>
+    <p>Выбрать случайный сеансовый ключ <span class="f">k</span>, <span class="f">1 &lt; k &lt; p − 1</span>, и вычислить</p>
+    <div class="f-block">a = g^k mod p,   b = y^k·M mod p</div>
+    <p>Шифртекст — пара <span class="f">(a, b)</span>.</p>
+</div>
+<div class="box definition">
+    <span class="box-title">Расшифрование</span>
+    <div class="f-block">s = a^x mod p,   M = b·s⁻¹ mod p</div>
+</div>
+<div class="box theorem">
+    <span class="box-title">Корректность</span>
+    <p>
+        <span class="f">s = a^x = g^(kx) = (g^x)^k = y^k (mod p)</span>, поэтому <span class="f">b·s⁻¹ = y^k·M·(y^k)⁻¹ = M (mod p)</span>.
+        Обратный элемент <span class="f">s⁻¹</span> существует, так как <span class="f">s</span> не делится на простое <span class="f">p</span>; его находит
+        <a href="{{ root }}/theory/diophantine">расширенный алгоритм Евклида</a> или формула <span class="f">s⁻¹ = s^(p−2) mod p</span> (малая теорема Ферма).
+    </p>
+</div>
+
+<div class="box example">
+    <span class="box-title">Пример на маленьких числах</span>
+    <p>
+        <b>Ключи:</b> <span class="f">p = 23</span>, <span class="f">g = 5</span> (первообразный корень: <span class="f">p − 1 = 22 = 2·11</span>,
+        <span class="f">5^2 = 2 ≢ 1</span>, <span class="f">5^11 ≡ 22 ≢ 1</span>), секретный <span class="f">x = 6</span>,
+        открытый <span class="f">y = 5^6 mod 23 = 8</span>.
+    </p>
+    <p>
+        <b>Шифрование</b> <span class="f">M = 10</span> с <span class="f">k = 3</span>: <span class="f">a = 5^3 mod 23 = 10</span>,
+        <span class="f">y^k = 8^3 mod 23 = 6</span>, <span class="f">b = 6·10 mod 23 = 14</span>. Шифртекст <span class="f">(10, 14)</span>.
+    </p>
+    <p>
+        <b>Расшифрование:</b> <span class="f">s = 10^6 mod 23 = 6</span> (совпало с <span class="f">y^k</span>), <span class="f">s⁻¹ = 4</span>,
+        так как <span class="f">6·4 = 24 ≡ 1</span>; <span class="f">M = 14·4 mod 23 = 56 mod 23 = 10</span>.
+    </p>
+</div>
+
+<h2>Роль сеансового ключа k</h2>
+<p>
+    Число <span class="f">k</span> отправитель выбирает заново для каждого сообщения (в лаборатории — для каждого символа) и сразу забывает.
+    Получателю оно не нужно: маску <span class="f">y^k</span> он восстанавливает из <span class="f">a = g^k</span> своим секретным <span class="f">x</span>.
+</p>
+<ul>
+    <li><b>Вероятностное шифрование.</b> Без случайного <span class="f">k</span> одинаковые символы давали бы одинаковые шифртексты, и шифр
+        вскрывался бы <a href="{{ root }}/theory/classical-ciphers">частотным анализом</a>. Со свежим <span class="f">k</span> каждое «о» шифруется по-новому.</li>
+    <li><b>Повтор k раскрывает сообщения.</b> При одном <span class="f">k</span> маска одинакова, и <span class="f">b_1·b_2⁻¹ = M_1·M_2⁻¹ (mod p)</span>: зная одно
+        сообщение, противник вычисляет другое без секретного ключа.</li>
+    <li><b>Утечка k раскрывает сообщение:</b> <span class="f">M = b·(y^k)⁻¹</span> вычисляется по открытому ключу.</li>
+</ul>
+<p>
+    Условие <span class="f">НОД(k, p − 1) = 1</span>, которое часто приводят в учебниках, для шифрования не обязательно — оно нужно
+    в <b>подписи</b> Эль-Гамаля, где вычисляется <span class="f">k⁻¹ mod (p − 1)</span>.
+</p>
+
+<h2>Свойства</h2>
+<ul>
+    <li><b>Расширение шифртекста.</b> Каждое число <span class="f">M</span> превращается в пару, поэтому шифртекст вдвое длиннее.</li>
+    <li><b>Мультипликативный гомоморфизм.</b> Покомпонентное произведение шифртекстов <span class="f">(a_1·a_2, b_1·b_2)</span> расшифровывается в
+        <span class="f">M_1·M_2</span>. Это полезно в электронном голосовании, но означает, что шифртекст можно подделать, не зная сообщения
+        (шифр <i>пластичен</i>).</li>
+    <li><b>Стойкость</b> при пассивном противнике сводится к задаче Диффи–Хеллмана: по <span class="f">g^x</span> и <span class="f">g^k</span> вычислить <span class="f">g^(xk)</span>.</li>
+</ul>
+
+<div class="box warning">
+    <span class="box-title">Чем учебная схема отличается от практики</span>
+    <ul>
+        <li><b>Размер ключа.</b> Сегодня для конечных полей рекомендуют <span class="f">p</span> не меньше 2048 бит (или эллиптические кривые). В лаборатории — до 1024 бит.</li>
+        <li><b>Подгруппа простого порядка.</b> Если <span class="f">g</span> — первообразный корень, символ Лежандра <span class="f">(a/p)</span> выдаёт чётность <span class="f">k</span>,
+            а <span class="f">(y/p)</span> — чётность <span class="f">x</span>; отсюда противник узнаёт, является ли <span class="f">M</span> квадратичным вычетом, — один бит
+            информации о сообщении. Поэтому на практике <span class="f">g</span> берут порождающим подгруппы большого простого порядка <span class="f">q | p − 1</span>.</li>
+        <li><b>Большой простой делитель p − 1.</b> Если <span class="f">p − 1</span> состоит только из малых простых, логарифм находится быстро
+            (<a href="{{ root }}/theory/residues">алгоритм Полига–Хеллмана</a>). В генераторе лаборатории <span class="f">p − 1 = R·q</span> с простым <span class="f">q</span> примерно половинной длины.</li>
+        <li><b>Гибридное шифрование.</b> Длинные сообщения не шифруют посимвольно: асимметричная часть передаёт случайный ключ,
+            а данные шифрует симметричный шифр (например, AES).</li>
+    </ul>
+</div>
+
+<h2>Где взять большое простое p</h2>
+<p>
+    Ключ начинается с простого числа нужной длины — например, 1024 или 2048 бит. Пробное деление для таких чисел неприменимо;
+    в лаборатории <span class="f">p</span> строится по цепочке с доказательством простоты по критерию Поклингтона, а заодно получается
+    разложение <span class="f">p − 1</span>, без которого нельзя проверить, что <span class="f">g</span> — первообразный корень.
+    Подробно — в статье <a href="{{ root }}/theory/primality">«Простые числа и тесты простоты»</a>.
+</p>
+
+<div class="box lab">
+    <span class="box-title">В лаборатории</span>
+    <p>
+        Введите ключи вручную (попробуйте <span class="f">p = 23</span>, <span class="f">g = 5</span>, <span class="f">x = 6</span> — коды символов должны быть меньше <span class="f">p</span>,
+        поэтому для текста понадобится <span class="f">p</span> побольше) или сгенерируйте большое простое. Разбор покажет ключи, сертификат
+        простоты и таблицы шифрования и расшифрования для каждого символа.
+        <a href="{{ root }}/lab?algorithm=elgamal">Открыть шифр Эль-Гамаля →</a>
+    </p>
+</div>
+
+<h2>Вопросы для самопроверки</h2>
+<ol class="questions">
+    <li>Зашифруйте <span class="f">M = 7</span> на ключах из примера (<span class="f">p = 23, g = 5, y = 8</span>) с <span class="f">k = 2</span> и расшифруйте обратно.
+        <details class="answer"><summary>Ответ</summary><span class="f">a = 25 mod 23 = 2</span>, <span class="f">y^2 = 64 mod 23 = 18</span>, <span class="f">b = 18·7 mod 23 = 126 mod 23 = 11</span>. Расшифрование: <span class="f">s = 2^6 mod 23 = 18</span>, <span class="f">s⁻¹ = 9</span> (<span class="f">18·9 = 162 = 7·23 + 1</span>), <span class="f">M = 11·9 mod 23 = 99 mod 23 = 7</span>.</details></li>
+    <li>Почему при расшифровании не нужно знать <span class="f">k</span>?
+        <details class="answer"><summary>Ответ</summary>Маска <span class="f">y^k</span> равна <span class="f">a^x</span>, а <span class="f">a</span> есть в шифртексте, <span class="f">x</span> — у получателя.</details></li>
+    <li>Два сообщения зашифрованы с одним <span class="f">k</span>: <span class="f">b_1 = 14</span>, <span class="f">b_2 = 6</span> (mod 23), и известно <span class="f">M_1 = 10</span>. Найдите <span class="f">M_2</span>.
+        <details class="answer"><summary>Ответ</summary><span class="f">M_2 = M_1·b_2·b_1⁻¹ mod 23</span>; <span class="f">14⁻¹ = 5</span> (<span class="f">14·5 = 70 = 3·23 + 1</span>), <span class="f">M_2 = 10·6·5 mod 23 = 300 mod 23 = 1</span>.</details></li>
+</ol>
+{% endblock %}

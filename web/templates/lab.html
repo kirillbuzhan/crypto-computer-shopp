@@ -1,0 +1,574 @@
+{% extends "base.html" %}
+
+{% block title %}Лаборатория — {{ site.title }}{% endblock %}
+{% block description %}Интерактивная система передачи информации: коды Хаффмана, Шеннона–Фано, Хэмминга, Адамара, шифр Эль-Гамаля и примеры по теории чисел.{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ root }}/static/style.css?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+<div id="lab" class="lab" data-initial-algorithm="{{ initial_algorithm }}" data-theory="{{ theory_links|tojson|forceescape }}">
+
+    <div class="overlay" id="algorithm-overlay"{% if initial_algorithm %} hidden{% endif %}>
+        <div class="modal">
+            <h2>Выберите алгоритм</h2>
+            <p class="modal-hint">
+                Алгоритм можно будет сменить позже кнопкой рядом с заголовком.
+                Теория по каждому разделу — в <a href="{{ root }}/theory">справочных статьях</a>.
+            </p>
+
+            <div class="algorithm-options">
+                <div class="algorithm-group-title">Передача информации и шифры</div>
+
+                <button class="algorithm-option" data-algorithm="reverse">
+                    <span class="algorithm-title">Переворачивание текста</span>
+                    <span class="algorithm-desc">Сообщение записывается в обратном порядке символов</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="huffman">
+                    <span class="algorithm-title">Код Хаффмана</span>
+                    <span class="algorithm-desc">Сжатие с построением дерева и наглядной трассировкой битов</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="shannon">
+                    <span class="algorithm-title">Код Шеннона-Фано</span>
+                    <span class="algorithm-desc">Символы делятся на две группы по частоте сверху вниз, дерево и трассировка — так же наглядно</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="hamming">
+                    <span class="algorithm-title">Код Хэмминга</span>
+                    <span class="algorithm-desc">Помехоустойчивый код (7,4) или (15,11) на выбор: каждый блок сам находит и исправляет одну ошибку — с демонстрацией сбоя</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="hadamard">
+                    <span class="algorithm-title">Код Адамара</span>
+                    <span class="algorithm-desc">Кодовые слова — строки матрицы Адамара 8, 16 или 32 порядка: исправляет до 1, 3 или 7 ошибок в блоке, декодирование по максимуму корреляции</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="elgamal">
+                    <span class="algorithm-title">Шифр Эль-Гамаля</span>
+                    <span class="algorithm-desc">Асимметричный шифр на дискретном логарифме: каждый символ превращается в пару (a, b) со случайным сеансовым ключом k, расшифровка — секретным ключом x</span>
+                </button>
+
+                <div class="algorithm-group-title">Алгебраические структуры</div>
+
+                <button class="algorithm-option" data-algorithm="monoids">
+                    <span class="algorithm-title">Моноиды</span>
+                    <span class="algorithm-desc">5 примеров (M, ∘, e): строки, сложение, умножение по модулю n, XOR битовых векторов, матрицы 2×2 — со свёрткой и проверкой аксиом</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="diophantine">
+                    <span class="algorithm-title">Диофантовы уравнения</span>
+                    <span class="algorithm-desc">5 примеров: ax + by = c, линейное сравнение, ключ RSA, размен монет, пифагоровы тройки — с расширенным алгоритмом Евклида по шагам</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="congruences">
+                    <span class="algorithm-title">Сравнения</span>
+                    <span class="algorithm-desc">5 примеров: быстрое aᵏ mod m, теоремы Эйлера и Ферма, китайская теорема об остатках, квадратичные сравнения, признаки делимости</span>
+                </button>
+
+                <button class="algorithm-option" data-algorithm="residues">
+                    <span class="algorithm-title">Вычеты</span>
+                    <span class="algorithm-desc">5 примеров: классы вычетов, приведённая система и φ(m), обратимые элементы и делители нуля ℤₘ, порядок и первообразные корни, дискретный логарифм</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+
+        <div class="title-row">
+            <h1>Система передачи информации</h1>
+
+            <button id="change-algorithm-button" class="ghost-button" hidden>
+                Алгоритм: <span id="current-algorithm-label">—</span> · изменить
+            </button>
+        </div>
+
+        <div class="theory-links" id="theory-links" hidden></div>
+
+        <div class="frequency-source-row" id="frequency-source-row" hidden>
+            <span class="frequency-source-label">Частоты символов для построения кода:</span>
+
+            <div class="segmented-control">
+                <button class="segmented-option active" data-frequency-source="message" type="button">
+                    Из сообщения
+                </button>
+                <button class="segmented-option" data-frequency-source="file" type="button">
+                    Из frequency.json
+                </button>
+            </div>
+        </div>
+
+        <div class="hamming-variant-row" id="hamming-variant-row" hidden>
+            <span class="frequency-source-label">Вариант кода Хэмминга:</span>
+
+            <div class="segmented-control">
+                <button class="segmented-option active" data-hamming-variant="74" type="button">
+                    (7,4)
+                </button>
+                <button class="segmented-option" data-hamming-variant="1511" type="button">
+                    (15,11)
+                </button>
+            </div>
+        </div>
+
+        <div class="hamming-error-row" id="hamming-error-row" hidden>
+            <label class="checkbox-row">
+                <input type="checkbox" id="simulate-error-checkbox">
+                Смоделировать ошибку при передаче (испортить 1 случайный бит)
+            </label>
+        </div>
+
+        <div class="hamming-variant-row" id="hadamard-variant-row" hidden>
+            <span class="frequency-source-label">Порядок матрицы Адамара:</span>
+
+            <div class="segmented-control">
+                <button class="segmented-option active" data-hadamard-variant="8" type="button">
+                    n = 8 (4 бита)
+                </button>
+                <button class="segmented-option" data-hadamard-variant="16" type="button">
+                    n = 16 (5 бит)
+                </button>
+                <button class="segmented-option" data-hadamard-variant="32" type="button">
+                    n = 32 (6 бит)
+                </button>
+            </div>
+        </div>
+
+        <div class="hamming-error-row" id="hadamard-error-row" hidden>
+            <label class="checkbox-row">
+                <input type="checkbox" id="hadamard-simulate-error-checkbox">
+                Смоделировать ошибки при передаче: испортить
+                <input type="number" id="hadamard-error-count" class="error-count-input" min="1" max="8" value="1">
+                бит(а) в случайном блоке
+            </label>
+            <span class="error-count-hint" id="hadamard-error-hint"></span>
+        </div>
+
+        <div class="elgamal-key-row" id="elgamal-key-row" hidden>
+            <span class="frequency-source-label">Ключи Эль-Гамаля:</span>
+
+            <label class="param-field">
+                <span>p (простое)</span>
+                <input type="text" inputmode="numeric" id="elgamal-p" value="2357">
+            </label>
+            <label class="param-field">
+                <span>g (первообразный корень)</span>
+                <input type="text" inputmode="numeric" id="elgamal-g" value="2">
+            </label>
+            <label class="param-field">
+                <span>x (секретный ключ)</span>
+                <input type="text" inputmode="numeric" id="elgamal-x" value="1751">
+            </label>
+
+            <button class="ghost-button" id="elgamal-generate-button" type="button">Случайные ключи</button>
+
+            <label class="param-field elgamal-bits-field">
+                <span>размер p, бит</span>
+                <input type="number" id="elgamal-bits" value="128" min="32" max="1024" step="1">
+            </label>
+            <button class="ghost-button" id="elgamal-large-button" type="button">Большое простое (Поклингтон)</button>
+
+            <span class="error-count-hint elgamal-key-hint" id="elgamal-key-hint">
+                p должно быть больше кода любого символа сообщения (кириллица — до 1105).
+                Вручную — простое до 10⁹; большое p (32–1024 бит) генерируется с доказательством простоты
+                по критерию Поклингтона.
+            </span>
+        </div>
+
+        <div id="transmission-view">
+
+        <section class="input-section">
+            <label for="message">Сообщение:</label>
+
+            <div class="input-row">
+                <input
+                    type="text"
+                    id="message"
+                    placeholder="Введите сообщение"
+                    maxlength="{{ max_message_length }}"
+                >
+
+                <button id="transmit-button">
+                    Передать
+                </button>
+            </div>
+        </section>
+
+        <section class="system">
+
+            <div class="system-block">
+                <h2>Источник</h2>
+                <div class="message" id="source-message">—</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="system-block">
+                <h2>Кодер</h2>
+                <div class="message" id="encoded-message">—</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="system-block">
+                <h2>Декодер</h2>
+                <div class="message" id="decoded-message">—</div>
+            </div>
+
+            <div class="arrow">→</div>
+
+            <div class="system-block">
+                <h2>Приёмник</h2>
+                <div class="message" id="receiver-message">—</div>
+            </div>
+
+        </section>
+
+        </div>
+
+        <p class="error" id="error-message"></p>
+
+        <section class="monoid-section" id="monoid-section" hidden>
+            <div class="monoid-definition">
+                <h2>Моноид</h2>
+                <p>
+                    <b>Моноид</b> — это тройка <span class="math">(M, ∘, e)</span>: множество <span class="math">M</span>,
+                    бинарная операция <span class="math">∘ : M × M → M</span> и элемент <span class="math">e ∈ M</span>, такие что:
+                </p>
+                <ul>
+                    <li><b>ассоциативность:</b> <span class="math">(a ∘ b) ∘ c = a ∘ (b ∘ c)</span> для любых <span class="math">a, b, c ∈ M</span>;</li>
+                    <li><b>нейтральный элемент:</b> <span class="math">e ∘ a = a ∘ e = a</span> для любого <span class="math">a ∈ M</span>.</li>
+                </ul>
+                <p class="monoid-muted">
+                    Коммутативность (<span class="math">a ∘ b = b ∘ a</span>) не требуется. Благодаря ассоциативности
+                    произведение <span class="math">a₁ ∘ a₂ ∘ … ∘ aₙ</span> не зависит от расстановки скобок, а пустое произведение равно <span class="math">e</span>.
+                </p>
+            </div>
+
+            <div class="monoid-tabs" id="monoid-tabs">
+                <button class="monoid-tab active" data-monoid="strings" type="button">1. Строки</button>
+                <button class="monoid-tab" data-monoid="addition" type="button">2. Сложение</button>
+                <button class="monoid-tab" data-monoid="modular" type="button">3. Умножение mod n</button>
+                <button class="monoid-tab" data-monoid="xor" type="button">4. XOR векторов</button>
+                <button class="monoid-tab" data-monoid="matrices" type="button">5. Матрицы 2×2</button>
+            </div>
+
+            <div class="monoid-example">
+                <div class="monoid-example-head">
+                    <h3 id="monoid-example-title">—</h3>
+                    <span class="monoid-signature math" id="monoid-signature">—</span>
+                </div>
+
+                <p id="monoid-example-desc"></p>
+
+                <div class="monoid-props" id="monoid-props"></div>
+
+                <div class="monoid-input">
+                    <label for="monoid-elements">Элементы через запятую:</label>
+
+                    <div class="input-row">
+                        <input type="text" id="monoid-elements">
+
+                        <label class="monoid-modulus" id="monoid-modulus-wrap" hidden>
+                            n =
+                            <input type="number" id="monoid-modulus" min="2" max="100" value="10">
+                        </label>
+
+                        <button id="monoid-run-button" type="button">Вычислить</button>
+                    </div>
+
+                    <p class="monoid-input-hint" id="monoid-input-hint"></p>
+                </div>
+
+                <p class="error" id="monoid-error"></p>
+
+                <div id="monoid-result" hidden>
+                    <div class="code-block">
+                        <h3>Свёртка: e ∘ a₁ ∘ a₂ ∘ … ∘ aₙ</h3>
+                        <div class="trace-row" id="monoid-fold"></div>
+                        <div class="bitstring" id="monoid-fold-result"></div>
+                    </div>
+
+                    <div class="code-block">
+                        <h3>Проверка аксиом</h3>
+                        <div class="monoid-checks" id="monoid-checks"></div>
+                    </div>
+
+                    <div class="code-block" id="monoid-cayley-block" hidden>
+                        <h3 id="monoid-cayley-title">Таблица Кэли</h3>
+                        <div class="table-wrap">
+                            <table class="hadamard-matrix monoid-cayley" id="monoid-cayley"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="monoid-section" id="diophantine-section" hidden>
+            <div class="monoid-definition">
+                <h2>Диофантовы уравнения</h2>
+                <p>
+                    <b>Диофантово уравнение</b> — уравнение с целыми коэффициентами, решения которого ищутся
+                    <b>в целых числах</b>. Главный инструмент для линейных уравнений — теорема:
+                </p>
+                <ul>
+                    <li>уравнение <span class="math">ax + by = c</span> разрешимо в целых числах ⇔ <span class="math">НОД(a, b) | c</span>;</li>
+                    <li>если <span class="math">(x₀, y₀)</span> — решение, то все решения: <span class="math">x = x₀ + (b/d)·t,  y = y₀ − (a/d)·t,  t ∈ ℤ</span>, где <span class="math">d = НОД(a, b)</span>.</li>
+                </ul>
+                <p class="monoid-muted">
+                    Частное решение даёт расширенный алгоритм Евклида: он находит коэффициенты Безу
+                    <span class="math">s, t</span> с <span class="math">a·s + b·t = d</span>.
+                </p>
+            </div>
+
+            <div class="monoid-tabs" id="diophantine-tabs">
+                <button class="monoid-tab active" data-example="linear" type="button">1. ax + by = c</button>
+                <button class="monoid-tab" data-example="congruence" type="button">2. Сравнение</button>
+                <button class="monoid-tab" data-example="rsa" type="button">3. Ключ RSA</button>
+                <button class="monoid-tab" data-example="coins" type="button">4. Размен монет</button>
+                <button class="monoid-tab" data-example="pythagorean" type="button">5. Пифагоровы тройки</button>
+            </div>
+
+            <div class="monoid-example">
+                <div class="monoid-example-head">
+                    <h3 id="diophantine-example-title">—</h3>
+                    <span class="monoid-signature math" id="diophantine-equation">—</span>
+                </div>
+
+                <p id="diophantine-example-desc"></p>
+
+                <div class="dioph-params">
+                    <div class="dioph-fields" id="diophantine-fields"></div>
+                    <button id="diophantine-run-button" type="button">Решить</button>
+                </div>
+
+                <p class="monoid-input-hint" id="diophantine-hint"></p>
+
+                <p class="error" id="diophantine-error"></p>
+
+                <div id="diophantine-result"></div>
+            </div>
+        </section>
+
+        <section class="monoid-section" id="congruence-section" hidden>
+            <div class="monoid-definition">
+                <h2>Сравнения по модулю</h2>
+                <p>
+                    Целые числа <span class="math">a</span> и <span class="math">b</span> <b>сравнимы по модулю</b> <span class="math">m</span>,
+                    если они дают одинаковые остатки при делении на <span class="math">m</span>:
+                    <span class="math">a ≡ b (mod m) ⇔ m | (a − b)</span>.
+                </p>
+                <ul>
+                    <li>сравнения по одному модулю можно <b>складывать, вычитать и перемножать</b>, а значит — возводить в степень;</li>
+                    <li>делить обе части на <span class="math">c</span> можно, только если <span class="math">НОД(c, m) = 1</span>;</li>
+                    <li>все числа разбиваются на <span class="math">m</span> классов вычетов <span class="math">0, 1, …, m − 1</span> — это кольцо <span class="math">ℤₘ</span>.</li>
+                </ul>
+                <p class="monoid-muted">
+                    На арифметике остатков построены RSA, Диффи–Хеллман и контрольные суммы. Линейное сравнение
+                    <span class="math">ax ≡ b (mod m)</span> разобрано в разделе «Диофантовы уравнения».
+                </p>
+            </div>
+
+            <div class="monoid-tabs" id="congruence-tabs">
+                <button class="monoid-tab active" data-example="power" type="button">1. aᵏ mod m</button>
+                <button class="monoid-tab" data-example="euler" type="button">2. Эйлер и Ферма</button>
+                <button class="monoid-tab" data-example="crt" type="button">3. Китайская теорема</button>
+                <button class="monoid-tab" data-example="quadratic" type="button">4. x² ≡ a (mod p)</button>
+                <button class="monoid-tab" data-example="divisibility" type="button">5. Признаки делимости</button>
+            </div>
+
+            <div class="monoid-example">
+                <div class="monoid-example-head">
+                    <h3 id="congruence-example-title">—</h3>
+                    <span class="monoid-signature math" id="congruence-equation">—</span>
+                </div>
+
+                <p id="congruence-example-desc"></p>
+
+                <div class="dioph-params">
+                    <div class="dioph-fields" id="congruence-fields"></div>
+                    <button id="congruence-run-button" type="button">Решить</button>
+                </div>
+
+                <p class="monoid-input-hint" id="congruence-hint"></p>
+
+                <p class="error" id="congruence-error"></p>
+
+                <div id="congruence-result"></div>
+            </div>
+        </section>
+
+        <section class="monoid-section" id="residue-section" hidden>
+            <div class="monoid-definition">
+                <h2>Вычеты</h2>
+                <p>
+                    <b>Класс вычетов</b> числа <span class="math">a</span> по модулю <span class="math">m</span> —
+                    множество <span class="math">[a]ₘ = {a + km : k ∈ ℤ}</span> всех чисел, сравнимых с <span class="math">a</span>.
+                    Любой элемент класса называется <b>вычетом</b>.
+                </p>
+                <ul>
+                    <li><b>полная система вычетов</b> — по одному представителю из каждого из <span class="math">m</span> классов, например <span class="math">0, 1, …, m − 1</span>;</li>
+                    <li><b>приведённая система вычетов</b> — представители классов, взаимно простых с <span class="math">m</span>; их <span class="math">φ(m)</span> штук;</li>
+                    <li>классы складываются и перемножаются: <span class="math">[a] + [b] = [a + b]</span>, <span class="math">[a]·[b] = [ab]</span> — это кольцо <span class="math">ℤₘ</span>, а обратимые классы образуют группу <span class="math">ℤₘ*</span>.</li>
+                </ul>
+                <p class="monoid-muted">
+                    Квадратичные вычеты и критерий Эйлера разобраны в разделе «Сравнения» (пример 4).
+                </p>
+            </div>
+
+            <div class="monoid-tabs" id="residue-tabs">
+                <button class="monoid-tab active" data-example="classes" type="button">1. Классы вычетов</button>
+                <button class="monoid-tab" data-example="reduced" type="button">2. Приведённая система</button>
+                <button class="monoid-tab" data-example="units" type="button">3. Обратимые в ℤₘ</button>
+                <button class="monoid-tab" data-example="order" type="button">4. Первообразные корни</button>
+                <button class="monoid-tab" data-example="dlog" type="button">5. Дискретный логарифм</button>
+            </div>
+
+            <div class="monoid-example">
+                <div class="monoid-example-head">
+                    <h3 id="residue-example-title">—</h3>
+                    <span class="monoid-signature math" id="residue-equation">—</span>
+                </div>
+
+                <p id="residue-example-desc"></p>
+
+                <div class="dioph-params">
+                    <div class="dioph-fields" id="residue-fields"></div>
+                    <button id="residue-run-button" type="button">Решить</button>
+                </div>
+
+                <p class="monoid-input-hint" id="residue-hint"></p>
+
+                <p class="error" id="residue-error"></p>
+
+                <div id="residue-result"></div>
+            </div>
+        </section>
+
+        <section class="code-section" id="code-section" hidden>
+            <h2 id="code-section-title">Визуализация кода</h2>
+
+            <div class="code-block">
+                <h3>Таблица кодов</h3>
+                <p class="note" id="frequency-note" hidden></p>
+                <div class="table-wrap">
+                    <table class="code-table">
+                        <thead>
+                            <tr>
+                                <th>Символ</th>
+                                <th>Частота</th>
+                                <th>Код</th>
+                            </tr>
+                        </thead>
+                        <tbody id="code-codes-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <h3>Кодирование (символ → биты)</h3>
+                <div class="trace-row" id="encode-trace"></div>
+                <div class="bitstring" id="encode-bitstring"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Декодирование (биты → символ)</h3>
+                <div class="trace-row" id="decode-trace"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Дерево кода</h3>
+                <div class="tree-wrap" id="code-tree-wrap"></div>
+            </div>
+        </section>
+
+        <section class="hamming-section" id="hamming-section" hidden>
+            <h2 id="hamming-section-title">Визуализация кода Хэмминга</h2>
+
+            <div class="code-block">
+                <h3 id="hamming-encode-title">Кодирование (блок данных → кодовое слово)</h3>
+                <p class="hamming-legend">
+                    <span class="legend-swatch legend-data"></span> биты данных
+                    <span class="legend-swatch legend-parity"></span> биты чётности
+                </p>
+                <div class="hamming-blocks" id="hamming-encode-blocks"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Передача по каналу</h3>
+                <p class="note" id="hamming-error-note" hidden></p>
+                <div class="hamming-transmission" id="hamming-transmission"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Декодирование и самоконтроль (синдром → исправление)</h3>
+                <p class="hamming-legend">
+                    <span class="legend-swatch legend-ok"></span> ошибок нет
+                    <span class="legend-swatch legend-error"></span> ошибка найдена и исправлена — нажмите на блок для подробностей
+                </p>
+                <div class="hamming-blocks" id="hamming-decode-blocks"></div>
+            </div>
+        </section>
+
+        <section class="hamming-section" id="hadamard-section" hidden>
+            <h2 id="hadamard-section-title">Визуализация кода Адамара</h2>
+
+            <div class="code-block">
+                <h3 id="hadamard-matrix-title">Матрица Адамара</h3>
+                <p class="hamming-legend" id="hadamard-params"></p>
+                <div class="table-wrap">
+                    <table class="hadamard-matrix" id="hadamard-matrix"></table>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <h3 id="hadamard-encode-title">Кодирование (блок данных → строка матрицы)</h3>
+                <p class="hamming-legend">
+                    первый бит данных — знак (0: строка H, 1: инвертированная строка), остальные — номер строки
+                </p>
+                <div class="hamming-blocks" id="hadamard-encode-blocks"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Передача по каналу</h3>
+                <p class="note" id="hadamard-error-note" hidden></p>
+                <div class="hamming-transmission" id="hadamard-transmission"></div>
+            </div>
+
+            <div class="code-block">
+                <h3>Декодирование (максимум корреляции → исправление)</h3>
+                <p class="hamming-legend">
+                    <span class="legend-swatch legend-ok"></span> ошибок нет
+                    <span class="legend-swatch legend-error"></span> ошибки найдены и исправлены
+                    <span class="legend-swatch legend-fail"></span> ошибок больше, чем код может исправить — декодировано неверно
+                    · нажмите на блок для подробностей
+                </p>
+                <div class="hamming-blocks" id="hadamard-decode-blocks"></div>
+            </div>
+        </section>
+
+        <section class="hamming-section" id="elgamal-section" hidden>
+            <h2>Визуализация шифра Эль-Гамаля</h2>
+            <div id="elgamal-sections"></div>
+        </section>
+
+    </main>
+
+    <div class="overlay" id="hamming-detail-overlay" hidden>
+        <div class="modal hamming-detail-modal">
+            <button class="modal-close" id="hamming-detail-close" type="button" aria-label="Закрыть">×</button>
+
+            <h2 id="hamming-detail-title">Блок</h2>
+
+            <div id="hamming-detail-body"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ root }}/static/script.js?v={{ static_version }}"></script>
+{% endblock %}

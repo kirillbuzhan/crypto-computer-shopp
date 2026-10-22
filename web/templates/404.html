@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Страница не найдена — {{ site.title }}{% endblock %}
+
+{% block content %}
+<main class="page">
+    <div class="not-found">
+        <div class="code">404 ≢ 200</div>
+        <h1>Страница не найдена</h1>
+        <p>Возможно, адрес набран с ошибкой или статья была переименована.</p>
+        <p>
+            <a href="{{ root }}/">На главную</a> ·
+            <a href="{{ root }}/theory">Теория</a> ·
+            <a href="{{ root }}/lab">Лаборатория</a>
+        </p>
+    </div>
+</main>
+{% endblock %}

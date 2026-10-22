@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.title }} — {{ site.title }}{% endblock %}
+{% block description %}{{ topic.summary }}{% endblock %}
+
+{% block content %}
+<main class="page">
+    <nav class="breadcrumbs" aria-label="Навигация">
+        <a href="{{ root }}/">Главная</a> ›
+        <a href="{{ root }}/theory">Теория</a> ›
+        {{ topic.title }}
+    </nav>
+
+    <div class="theory-layout">
+        <aside class="theory-toc" aria-label="Статьи">
+            <h2>Статьи</h2>
+            {% for key, group_title, topics in groups %}
+            <h3>{{ group_title }}</h3>
+            <ul>
+                {% for item in topics %}
+                <li>
+                    <a href="{{ root }}/theory/{{ item.slug }}" {% if item.slug == topic.slug %}aria-current="page"{% endif %}>
+                        {{ item.title }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+        </aside>
+
+        <article class="article">
+            <h1>{{ topic.title }}</h1>
+
+            <div class="article-meta">
+                {% for key, group_title, topics in groups if key == topic.group %}
+                <span class="chip">{{ group_title }}</span>
+                {% endfor %}
+                {% if topic.lab %}
+                <a class="chip" href="{{ root }}/lab?algorithm={{ topic.lab }}">Открыть в лаборатории →</a>
+                {% endif %}
+            </div>
+
+            <nav class="article-contents" id="article-contents" aria-label="Содержание статьи" hidden>
+                <b>Содержание</b>
+                <ol></ol>
+            </nav>
+
+            {% block article %}{% endblock %}
+
+            <nav class="prev-next" aria-label="Соседние статьи">
+                {% if previous %}
+                <a class="prev" href="{{ root }}/theory/{{ previous.slug }}"><small>← Назад</small>{{ previous.title }}</a>
+                {% endif %}
+                {% if following %}
+                <a class="next" href="{{ root }}/theory/{{ following.slug }}"><small>Далее →</small>{{ following.title }}</a>
+                {% endif %}
+            </nav>
+        </article>
+    </div>
+</main>
+{% endblock %}

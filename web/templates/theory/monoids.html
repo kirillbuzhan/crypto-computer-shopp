@@ -1,0 +1,128 @@
+{% extends "theory_base.html" %}
+
+{% block article %}
+<p class="lead">
+    Моноид — одна из простейших алгебраических структур: множество с ассоциативной операцией и нейтральным элементом.
+    Моноидами являются строки со склейкой, числа со сложением или умножением, матрицы — и именно моноидная структура
+    объясняет, почему работают кодирование сообщений, быстрое возведение в степень и параллельные вычисления.
+</p>
+
+<h2>Определения</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p><b>Моноид</b> — тройка <span class="f">(M, ∘, e)</span>: множество <span class="f">M</span>, бинарная операция <span class="f">∘ : M × M → M</span> и элемент <span class="f">e ∈ M</span>, такие что</p>
+    <ul>
+        <li><b>ассоциативность:</b> <span class="f">(a ∘ b) ∘ c = a ∘ (b ∘ c)</span> для всех <span class="f">a, b, c ∈ M</span>;</li>
+        <li><b>нейтральный элемент:</b> <span class="f">e ∘ a = a ∘ e = a</span> для всех <span class="f">a ∈ M</span>.</li>
+    </ul>
+</div>
+<div class="table-scroll">
+    <table class="data-table">
+        <thead><tr><th>Структура</th><th>Требования</th><th>Пример</th></tr></thead>
+        <tbody>
+            <tr><td>Полугруппа</td><td>ассоциативность</td><td>положительные целые числа со сложением (нуля нет)</td></tr>
+            <tr><td>Моноид</td><td>+ нейтральный элемент</td><td>строки со склейкой; <span class="f">(ℕ ∪ {0}, +, 0)</span></td></tr>
+            <tr><td>Группа</td><td>+ обратный к каждому элементу</td><td><span class="f">(ℤ, +, 0)</span>; битовые векторы с XOR</td></tr>
+            <tr><td>Коммутативный моноид</td><td>+ <span class="f">a ∘ b = b ∘ a</span></td><td><span class="f">(ℤₙ, ·, 1)</span>; но не строки и не матрицы</td></tr>
+        </tbody>
+    </table>
+</div>
+<p>
+    Не всякая операция ассоциативна: вычитание — нет, <span class="f">(5 − 3) − 1 ≠ 5 − (3 − 1)</span>; возведение в степень — тоже нет,
+    <span class="f">(2^3)^2 = 64</span>, а <span class="f">2^(3^2) = 512</span>.
+</p>
+
+<h2>Основные свойства</h2>
+<div class="box theorem">
+    <span class="box-title">Единственность нейтрального элемента</span>
+    <p>В моноиде нейтральный элемент единственный.</p>
+</div>
+<p><b>Доказательство.</b> Если <span class="f">e</span> и <span class="f">e'</span> оба нейтральны, то <span class="f">e = e ∘ e' = e'</span> (первое равенство — потому что <span class="f">e'</span> нейтрален, второе — потому что нейтрален <span class="f">e</span>).</p>
+
+<div class="box theorem">
+    <span class="box-title">Обобщённая ассоциативность</span>
+    <p>
+        Значение произведения <span class="f">a_1 ∘ a_2 ∘ … ∘ a_n</span> не зависит от расстановки скобок. Пустое произведение
+        естественно считать равным <span class="f">e</span>.
+    </p>
+</div>
+<p>
+    Поэтому имеет смысл <b>свёртка</b> списка элементов: <span class="f">e ∘ a_1 ∘ a_2 ∘ … ∘ a_n</span>. Скобки можно расставить как удобно —
+    например, разбить список на части, свернуть каждую отдельно (параллельно, на разных компьютерах) и свернуть результаты. На этом
+    устроены MapReduce и параллельные вычисления сумм, произведений и конкатенаций.
+</p>
+
+<div class="box theorem">
+    <span class="box-title">Обратимые элементы образуют группу</span>
+    <p>
+        Элемент <span class="f">a</span> обратим, если существует <span class="f">b</span> с <span class="f">a ∘ b = b ∘ a = e</span>. Обратный элемент единственный,
+        произведение обратимых элементов обратимо: <span class="f">(a ∘ b)⁻¹ = b⁻¹ ∘ a⁻¹</span>.
+    </p>
+</div>
+<p>
+    Например, в моноиде <span class="f">(ℤₙ, ·, 1)</span> обратимы ровно вычеты, взаимно простые с <span class="f">n</span>, — они образуют группу <span class="f">ℤₙ*</span>
+    из <span class="f">φ(n)</span> элементов (см. <a href="{{ root }}/theory/residues">«Вычеты»</a>). Именно в этой группе работает
+    <a href="{{ root }}/theory/elgamal">шифр Эль-Гамаля</a>.
+</p>
+
+<h2>Пять примеров из лаборатории</h2>
+<div class="table-scroll">
+    <table class="data-table">
+        <thead><tr><th>Моноид</th><th>Операция</th><th>Нейтральный</th><th>Коммутативен</th><th>Группа</th></tr></thead>
+        <tbody>
+            <tr><td>Строки над алфавитом</td><td>склейка</td><td>пустая строка</td><td>нет</td><td>нет</td></tr>
+            <tr><td>Целые неотрицательные числа</td><td><span class="f">+</span></td><td>0</td><td>да</td><td>нет (нет −1)</td></tr>
+            <tr><td><span class="f">ℤₙ</span></td><td>умножение mod <span class="f">n</span></td><td>1</td><td>да</td><td>нет (0 необратим)</td></tr>
+            <tr><td>Битовые векторы длины <span class="f">k</span></td><td>XOR</td><td>00…0</td><td>да</td><td>да: <span class="f">a⁻¹ = a</span></td></tr>
+            <tr><td>Матрицы 2×2</td><td>умножение</td><td><span class="f">E</span></td><td>нет</td><td>нет (вырожденные)</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<h2>Гомоморфизмы и кодирование</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        Отображение <span class="f">h : M → N</span> между моноидами — <b>гомоморфизм</b>, если <span class="f">h(a ∘ b) = h(a) ∘ h(b)</span> и <span class="f">h(e_M) = e_N</span>.
+    </p>
+</div>
+<ul>
+    <li><b>Длина строки</b> — гомоморфизм из моноида строк в <span class="f">(ℕ ∪ {0}, +, 0)</span>: <span class="f">|uv| = |u| + |v|</span>.</li>
+    <li><b>Кодирование сообщения</b> посимвольным кодом (Хаффмана, Шеннона–Фано) — гомоморфизм моноида строк над алфавитом сообщения
+        в моноид двоичных строк: код склейки — склейка кодов. Однозначная декодируемость означает, что этот гомоморфизм
+        <b>инъективен</b>, а <a href="{{ root }}/theory/huffman">префиксные коды</a> — удобный способ это гарантировать.</li>
+    <li><b>Возведение в степень по модулю</b> <span class="f">k ↦ g^k mod p</span> — гомоморфизм из <span class="f">(ℤ, +)</span> в <span class="f">(ℤₚ*, ·)</span>:
+        <span class="f">g^(k+l) = g^k·g^l</span>. Обращение этого гомоморфизма — задача дискретного логарифма.</li>
+</ul>
+
+<h2>Быстрое возведение в степень в любом моноиде</h2>
+<p>
+    Степень <span class="f">a^n = a ∘ a ∘ … ∘ a</span> по ассоциативности можно вычислять «удвоением»: <span class="f">a^(2m) = a^m ∘ a^m</span>,
+    <span class="f">a^(2m+1) = a^(2m) ∘ a</span>. Нужно <span class="f">O(log n)</span> операций вместо <span class="f">n − 1</span>. Один и тот же алгоритм работает для чисел
+    по модулю (<a href="{{ root }}/theory/congruences">RSA, Эль-Гамаль</a>), для матриц и для строк.
+</p>
+<div class="box example">
+    <span class="box-title">Пример: числа Фибоначчи</span>
+    <div class="f-block">[[1, 1], [1, 0]]^n = [[F_(n+1), F_n], [F_n, F_(n−1)]]</div>
+    <p>Поэтому <span class="f">F_n</span> вычисляется за <span class="f">O(log n)</span> умножений матриц 2×2.</p>
+</div>
+
+<div class="box lab">
+    <span class="box-title">В лаборатории</span>
+    <p>
+        Введите элементы через запятую — лаборатория свернёт их в выбранном моноиде, проверит аксиомы на этих элементах и
+        для <span class="f">ℤₙ</span> построит таблицу Кэли.
+        <a href="{{ root }}/lab?algorithm=monoids">Открыть моноиды →</a>
+    </p>
+</div>
+
+<h2>Вопросы для самопроверки</h2>
+<ol class="questions">
+    <li>Является ли множество чётных чисел с умножением моноидом?
+        <details class="answer"><summary>Ответ</summary>Нет: операция ассоциативна и замкнута (полугруппа), но 1 — нейтральный элемент — не чётное.</details></li>
+    <li>Какие элементы обратимы в <span class="f">(ℤ_12, ·, 1)</span>?
+        <details class="answer"><summary>Ответ</summary>1, 5, 7, 11 — взаимно простые с 12; каждый из них обратен сам себе.</details></li>
+    <li>Докажите, что операция <span class="f">a ∘ b = max(a, b)</span> на неотрицательных числах задаёт моноид.
+        <details class="answer"><summary>Ответ</summary><span class="f">max(max(a, b), c) = max(a, max(b, c))</span> — наибольшее из трёх; нейтральный элемент — 0.</details></li>
+</ol>
+{% endblock %}

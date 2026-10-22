@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Теория — {{ site.title }}{% endblock %}
+{% block description %}Учебные статьи: теория информации, коды Хаффмана и Шеннона–Фано, коды Хэмминга и Адамара, шифр Эль-Гамаля, тесты простоты, сравнения и вычеты.{% endblock %}
+
+{% block content %}
+<main class="page">
+    <div class="page-head">
+        <h1>Теория</h1>
+        <p class="lead">
+            Статьи расположены в рекомендуемом порядке изучения: от модели передачи информации
+            и сжатия — к помехоустойчивым кодам, асимметричной криптографии и теории чисел, на которой она построена.
+        </p>
+    </div>
+
+    {% for key, group_title, topics in groups %}
+    <h2 class="section-title">{{ loop.index }}. {{ group_title }}</h2>
+    <div class="card-grid">
+        {% for topic in topics %}
+        <article class="card">
+            <h3><a href="{{ root }}/theory/{{ topic.slug }}">{{ topic.title }}</a></h3>
+            <p>{{ topic.summary }}</p>
+            {% if topic.lab %}
+            <div class="card-links">
+                <a href="{{ root }}/lab?algorithm={{ topic.lab }}">Практика: {{ topic.lab_title or topic.title }} →</a>
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</main>
+{% endblock %}

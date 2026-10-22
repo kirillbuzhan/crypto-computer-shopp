@@ -1,0 +1,29 @@
+# systemd-сервис для запуска без Docker.
+#   sudo cp deploy/crypto-lab.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now crypto-lab
+#
+# Предполагается, что проект лежит в /opt/crypto-lab, а виртуальное окружение
+# создано командой:  python3 -m venv /opt/crypto-lab/.venv
+#                    /opt/crypto-lab/.venv/bin/pip install -r requirements.txt
+
+[Unit]
+Description=Crypto lab (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/crypto-lab
+EnvironmentFile=-/opt/crypto-lab/.env
+ExecStart=/opt/crypto-lab/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --proxy-headers
+Restart=on-failure
+RestartSec=3
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

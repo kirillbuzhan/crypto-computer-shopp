@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <h1>{{ site.title }}</h1>
+        <p>
+            {{ site.subtitle }}. Каждый алгоритм можно запустить на своём сообщении и посмотреть
+            все промежуточные шаги, а рядом прочитать теорию, доказательства и примеры.
+        </p>
+        <div class="hero-actions">
+            <a class="button-link" href="{{ root }}/lab">Открыть лабораторию</a>
+            <a class="button-link secondary" href="{{ root }}/theory">Читать теорию</a>
+        </div>
+
+        <div class="scheme" aria-label="Схема системы передачи информации">
+            <span>Источник</span><span class="scheme-arrow">→</span>
+            <span>Кодер</span><span class="scheme-arrow">→</span>
+            <span class="scheme-noise">Канал с шумом</span><span class="scheme-arrow">→</span>
+            <span>Декодер</span><span class="scheme-arrow">→</span>
+            <span>Приёмник</span>
+        </div>
+    </div>
+</section>
+
+<main class="page">
+    <h2 class="section-title">Как работать с сайтом</h2>
+    <ol class="steps-list">
+        <li>
+            <b>Прочитайте теорию.</b> В каждой статье — определения, теоремы с доказательствами,
+            разобранный вручную пример и вопросы для самопроверки.
+        </li>
+        <li>
+            <b>Проверьте себя в лаборатории.</b> Выберите алгоритм, введите сообщение или параметры
+            и сравните пошаговый разбор со своими вычислениями.
+        </li>
+        <li>
+            <b>Пользуйтесь справочником.</b> Глоссарий терминов, сводка формул, обозначения
+            и список литературы собраны на одной странице.
+        </li>
+    </ol>
+
+    {% for key, group_title, topics in groups %}
+    <h2 class="section-title">{{ group_title }}</h2>
+    <div class="card-grid">
+        {% for topic in topics %}
+        <article class="card">
+            <h3>{{ topic.title }}</h3>
+            <p>{{ topic.summary }}</p>
+            <div class="card-links">
+                <a href="{{ root }}/theory/{{ topic.slug }}">Теория</a>
+                {% if topic.lab %}
+                <a href="{{ root }}/lab?algorithm={{ topic.lab }}">В лаборатории →</a>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</main>
+{% endblock %}

@@ -1,0 +1,1386 @@
+* {
+    box-sizing: border-box;
+}
+
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.input-section {
+    max-width: 700px;
+    margin: 0 auto 50px;
+}
+
+.input-section label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 6px;
+    background: #333;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #555;
+}
+
+.system {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.system-block {
+    width: 220px;
+    min-height: 150px;
+
+    padding: 20px;
+
+    background: white;
+    border: 2px solid #333;
+    border-radius: 10px;
+
+    text-align: center;
+}
+
+.system-block h2 {
+    margin-top: 0;
+    font-size: 20px;
+}
+
+.message {
+    min-height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px;
+
+    background: #f5f5f5;
+    border-radius: 6px;
+
+    overflow-wrap: anywhere;
+}
+
+.arrow {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 30px;
+    text-align: center;
+    color: #b00020;
+}
+
+@media (max-width: 900px) {
+    .system {
+        flex-direction: column;
+    }
+
+    .arrow {
+        transform: rotate(90deg);
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+}
+
+/* --- Overlay / выбор алгоритма --- */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+
+    padding: 20px;
+
+    /* Если модалка не помещается по высоте — overlay прокручивается колёсиком */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 100;
+}
+
+.overlay[hidden] {
+    display: none;
+}
+
+.modal {
+    width: 100%;
+    max-width: 560px;
+
+    padding: 30px;
+
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal {
+    position: relative;
+
+    /* Центрирование через auto-отступы: при переполнении верх модалки не обрезается */
+    margin: auto;
+}
+
+.modal h2 {
+    margin: 0 0 8px;
+    text-align: center;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+
+    width: 30px;
+    height: 30px;
+
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+
+    color: #666;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    background: #eee;
+    color: #222;
+}
+
+.modal-hint {
+    margin: 0 0 24px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.algorithm-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.algorithm-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+
+    padding: 16px 18px;
+
+    background: #f7f7f7;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+
+    text-align: left;
+    cursor: pointer;
+
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.algorithm-option:hover {
+    border-color: #333;
+    background: #efefef;
+}
+
+.algorithm-title {
+    font-size: 17px;
+    font-weight: bold;
+    color: #222;
+}
+
+.algorithm-desc {
+    font-size: 13px;
+    color: #666;
+}
+
+/* --- Заголовок + смена алгоритма --- */
+
+.title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+
+    margin-bottom: 40px;
+}
+
+.title-row h1 {
+    margin: 0;
+}
+
+.ghost-button {
+    padding: 8px 14px;
+
+    background: transparent;
+    border: 1px solid #999;
+    border-radius: 20px;
+
+    color: #333;
+    font-size: 13px;
+}
+
+.ghost-button:hover {
+    background: #e8e8e8;
+}
+
+.ghost-button[hidden] {
+    display: none;
+}
+
+/* --- Визуализация Хаффмана --- */
+
+.code-section {
+    max-width: 900px;
+    margin: 50px auto 0;
+}
+
+.code-section[hidden] {
+    display: none;
+}
+
+.code-section h2 {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.code-block {
+    margin-bottom: 34px;
+}
+
+.code-block h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.code-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-table th,
+.code-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.code-table th {
+    background: #333;
+    color: white;
+}
+
+.code-table td.char-cell {
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+}
+
+.code-table td.code-cell {
+    font-family: "Courier New", monospace;
+    letter-spacing: 1px;
+    color: #0a6b2e;
+}
+
+.trace-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.trace-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    min-width: 52px;
+
+    padding: 8px 10px;
+
+    background: white;
+    border: 2px solid #333;
+    border-radius: 8px;
+
+    font-family: "Courier New", monospace;
+
+    animation: chip-in 0.25s ease both;
+}
+
+.trace-chip .chip-top {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.trace-chip .chip-bottom {
+    font-size: 12px;
+    color: #0a6b2e;
+    letter-spacing: 1px;
+}
+
+.trace-chip.decode-chip .chip-top {
+    color: #0a6b2e;
+}
+
+.trace-chip.decode-chip .chip-bottom {
+    color: #222;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.trace-arrow {
+    align-self: center;
+    color: #999;
+}
+
+.bitstring {
+    margin-top: 14px;
+
+    padding: 10px 14px;
+
+    background: white;
+    border-radius: 8px;
+
+    font-family: "Courier New", monospace;
+    letter-spacing: 2px;
+    word-break: break-all;
+}
+
+@keyframes chip-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- Дерево Хаффмана --- */
+
+.tree-wrap {
+    display: flex;
+    justify-content: center;
+
+    padding: 20px;
+    overflow-x: auto;
+
+    background: white;
+    border-radius: 8px;
+}
+
+.code-tree-svg {
+    max-width: 100%;
+}
+
+.tree-edge {
+    stroke: #999;
+    stroke-width: 2;
+}
+
+.tree-edge-label {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: bold;
+    fill: #0a6b2e;
+}
+
+.tree-node-circle {
+    fill: white;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.tree-node-circle.tree-leaf-circle {
+    stroke: #0a6b2e;
+    stroke-width: 2.5;
+}
+
+.tree-char {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    fill: #222;
+}
+
+.tree-freq {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    fill: #666;
+}
+
+/* --- Выбор источника частот --- */
+
+.frequency-source-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    margin-bottom: 30px;
+}
+
+.frequency-source-row[hidden] {
+    display: none;
+}
+
+.frequency-source-label {
+    font-size: 14px;
+    color: #555;
+}
+
+.segmented-control {
+    display: inline-flex;
+    border: 1px solid #999;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.segmented-option {
+    padding: 6px 14px;
+
+    background: white;
+    border: none;
+
+    color: #333;
+    font-size: 13px;
+    cursor: pointer;
+
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.segmented-option + .segmented-option {
+    border-left: 1px solid #999;
+}
+
+.segmented-option:hover {
+    background: #eee;
+}
+
+.segmented-option.active {
+    background: #333;
+    color: white;
+}
+
+.note {
+    margin: -4px 0 14px;
+
+    font-size: 13px;
+    color: #a15b00;
+}
+
+.note[hidden] {
+    display: none;
+}
+
+/* --- Выбор варианта кода Хэмминга --- */
+
+.hamming-variant-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+.hamming-variant-row[hidden] {
+    display: none;
+}
+
+/* --- Симуляция ошибки для Хэмминга --- */
+
+.hamming-error-row {
+    display: flex;
+    justify-content: center;
+
+    margin-bottom: 30px;
+}
+
+.hamming-error-row[hidden] {
+    display: none;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+.checkbox-row input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* --- Визуализация Хэмминга --- */
+
+.hamming-section {
+    max-width: 900px;
+    margin: 50px auto 0;
+}
+
+.hamming-section[hidden] {
+    display: none;
+}
+
+.hamming-section h2 {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.hamming-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+
+    margin: 0 0 12px;
+
+    font-size: 12px;
+    color: #666;
+}
+
+.legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 4px;
+
+    border-radius: 2px;
+    vertical-align: middle;
+}
+
+.legend-data {
+    background: white;
+    border: 2px solid #0a6b2e;
+}
+
+.legend-parity {
+    background: white;
+    border: 2px solid #a15b00;
+}
+
+.legend-ok {
+    background: #e6f4ea;
+    border: 2px solid #0a6b2e;
+}
+
+.legend-error {
+    background: #fdecea;
+    border: 2px solid #c0392b;
+}
+
+.hamming-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.hamming-block-card {
+    padding: 10px 12px;
+
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+
+    animation: chip-in 0.25s ease both;
+}
+
+.hamming-block-card.has-error {
+    border-color: #c0392b;
+    background: #fdecea;
+}
+
+.hamming-block-label {
+    margin-bottom: 6px;
+
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+}
+
+.hamming-bit-row {
+    display: flex;
+    gap: 3px;
+}
+
+.hamming-bit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    width: 22px;
+}
+
+.hamming-bit-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    background: white;
+    border: 2px solid #0a6b2e;
+    border-radius: 4px;
+
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.hamming-bit.is-parity .hamming-bit-value {
+    border-color: #a15b00;
+}
+
+.hamming-bit.is-flipped .hamming-bit-value {
+    border-color: #c0392b;
+    background: #fdecea;
+    color: #c0392b;
+}
+
+.hamming-bit-position {
+    font-size: 9px;
+    color: #999;
+}
+
+.hamming-block-footer {
+    margin-top: 6px;
+
+    font-size: 11px;
+    color: #444;
+    text-align: center;
+}
+
+.hamming-block-footer .error-text {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.hamming-block-footer .ok-text {
+    color: #0a6b2e;
+}
+
+.hamming-transmission {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 14px;
+
+    background: white;
+    border-radius: 8px;
+}
+
+.hamming-transmission-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    word-break: break-all;
+}
+
+.hamming-transmission-row .transmission-label {
+    flex-shrink: 0;
+
+    width: 90px;
+
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #666;
+}
+
+.hamming-transmission-row .flipped-bit {
+    color: #c0392b;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* --- Карточки блоков Хэмминга с ошибкой: кликабельны --- */
+
+.hamming-block-card.has-error.clickable {
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.hamming-block-card.has-error.clickable:hover,
+.hamming-block-card.has-error.clickable:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(192, 57, 43, 0.25);
+    outline: none;
+}
+
+.detail-hint {
+    display: block;
+    margin-top: 2px;
+
+    color: #888;
+    font-size: 10px;
+    font-style: italic;
+}
+
+/* --- Модалка с подробностями ошибки --- */
+
+.hamming-detail-modal {
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.hamming-detail-section {
+    margin-bottom: 20px;
+}
+
+.hamming-detail-section h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.hamming-detail-section p {
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.hamming-detail-bit-row {
+    margin-bottom: 4px;
+}
+
+.hamming-bit.is-covered .hamming-bit-value {
+    background: #fff3e0;
+}
+
+.hamming-check-row {
+    padding: 10px;
+    margin-bottom: 10px;
+
+    background: #f7f7f7;
+    border-radius: 8px;
+    border-left: 3px solid #999;
+}
+
+.hamming-check-row.check-failed {
+    border-left-color: #c0392b;
+    background: #fdecea;
+}
+
+.hamming-check-label {
+    margin-bottom: 8px;
+
+    font-size: 12px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.hamming-check-label sub {
+    font-size: 10px;
+}
+/* --- Код Адамара --- */
+
+.hamming-error-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.checkbox-row input.error-count-input {
+    width: 52px;
+    height: 24px;
+    padding: 0 4px;
+
+    border: 1px solid #999;
+    border-radius: 4px;
+
+    font-size: 13px;
+    cursor: text;
+}
+
+.error-count-hint {
+    font-size: 12px;
+    color: #666;
+}
+
+.error-count-hint.over-limit {
+    color: #c0392b;
+}
+
+.legend-fail {
+    background: #fff3e0;
+    border: 2px dashed #c0392b;
+}
+
+.hamming-block-card.decode-failed {
+    border-style: dashed;
+    border-color: #c0392b;
+    background: #fff3e0;
+}
+
+.hamming-block-card.clickable {
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.hamming-block-card.clickable:hover,
+.hamming-block-card.clickable:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    outline: none;
+}
+
+.hadamard-bits .hamming-bit,
+.hadamard-bits .hamming-bit-value {
+    width: 16px;
+}
+
+.hadamard-bits .hamming-bit-value {
+    height: 20px;
+    font-size: 11px;
+}
+
+.hadamard-bits.hamming-bit-row {
+    gap: 2px;
+    flex-wrap: wrap;
+    max-width: 290px;
+}
+
+.hadamard-matrix {
+    border-collapse: collapse;
+    margin: 0 auto;
+
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+}
+
+.hadamard-matrix th,
+.hadamard-matrix td {
+    width: 16px;
+    height: 16px;
+    padding: 1px;
+
+    text-align: center;
+}
+
+.hadamard-matrix th {
+    color: #999;
+    font-weight: normal;
+}
+
+.hadamard-matrix td.plus {
+    background: #e6f4ea;
+    color: #0a6b2e;
+}
+
+.hadamard-matrix td.minus {
+    background: #fdecea;
+    color: #c0392b;
+}
+
+.hadamard-matrix tr.used th {
+    color: #333;
+    font-weight: bold;
+}
+
+.hadamard-matrix tr.highlight td {
+    outline: 2px solid #333;
+    outline-offset: -1px;
+}
+
+.correlation-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.correlation-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 34px;
+    padding: 4px 6px;
+
+    background: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+
+    font-size: 11px;
+}
+
+.correlation-chip .corr-row {
+    color: #999;
+    font-size: 10px;
+}
+
+.correlation-chip .corr-value {
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+}
+
+.correlation-chip.best {
+    background: #e6f4ea;
+    border-color: #0a6b2e;
+}
+
+.correlation-chip.tie {
+    background: #fff3e0;
+    border-color: #a15b00;
+}
+
+/* --- Группы в окне выбора --- */
+
+.algorithm-group-title {
+    margin-top: 8px;
+    padding-top: 14px;
+
+    border-top: 1px solid #ddd;
+
+    color: #888;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* --- Моноиды --- */
+
+#transmission-view[hidden],
+.monoid-section[hidden],
+#monoid-result[hidden],
+.monoid-modulus[hidden] {
+    display: none;
+}
+
+.monoid-section {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.math {
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.monoid-definition {
+    padding: 18px 22px;
+    margin-bottom: 26px;
+
+    background: white;
+    border-left: 4px solid #333;
+    border-radius: 8px;
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.monoid-definition h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.monoid-definition p,
+.monoid-definition ul {
+    margin: 6px 0;
+}
+
+.monoid-muted {
+    color: #666;
+    font-size: 13px;
+}
+
+.monoid-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 18px;
+}
+
+.monoid-tab {
+    padding: 8px 14px;
+
+    background: white;
+    border: 1px solid #999;
+    border-radius: 20px;
+
+    color: #333;
+    font-size: 13px;
+}
+
+.monoid-tab:hover {
+    background: #eee;
+}
+
+.monoid-tab.active {
+    background: #333;
+    border-color: #333;
+    color: white;
+}
+
+.monoid-example {
+    padding: 22px;
+
+    background: white;
+    border: 2px solid #333;
+    border-radius: 10px;
+}
+
+.monoid-example > p {
+    margin: 8px 0 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.monoid-example-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.monoid-example-head h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.monoid-signature {
+    padding: 4px 10px;
+
+    background: #f5f5f5;
+    border-radius: 6px;
+
+    font-size: 16px;
+}
+
+.monoid-props {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    margin-bottom: 18px;
+}
+
+.monoid-prop {
+    padding: 3px 10px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+}
+
+.monoid-prop.yes {
+    background: #e6f4ea;
+    color: #0a6b2e;
+}
+
+.monoid-prop.no {
+    background: #fff3e0;
+    color: #a15b00;
+}
+
+.monoid-input label[for] {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.monoid-modulus {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.monoid-modulus input {
+    width: 80px;
+    flex: none;
+}
+
+.monoid-input-hint {
+    margin: 8px 0 0;
+    color: #666;
+    font-size: 12px;
+}
+
+.monoid-section .error {
+    margin-top: 14px;
+}
+
+.monoid-section .code-block {
+    margin: 26px 0 0;
+}
+
+.monoid-section .trace-chip {
+    min-width: 0;
+    padding: 8px 12px;
+}
+
+.monoid-section .trace-chip .chip-top {
+    font-size: 13px;
+    font-weight: normal;
+}
+
+.monoid-section .trace-chip .chip-bottom {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0;
+}
+
+.monoid-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.monoid-check {
+    padding: 10px 14px;
+
+    background: #f7f7f7;
+    border-left: 3px solid #999;
+    border-radius: 8px;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.monoid-check.ok {
+    background: #e6f4ea;
+    border-left-color: #0a6b2e;
+}
+
+.monoid-check.fail {
+    background: #fdecea;
+    border-left-color: #c0392b;
+}
+
+.monoid-check.info {
+    background: #fff3e0;
+    border-left-color: #a15b00;
+}
+
+.monoid-check-title {
+    font-weight: bold;
+}
+
+.monoid-check code {
+    font-family: "Courier New", monospace;
+    word-break: break-all;
+}
+
+.monoid-cayley th:first-child {
+    color: #333;
+    font-weight: bold;
+}
+
+.monoid-cayley td {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #eee;
+}
+
+.monoid-cayley td.identity-cell {
+    background: #e6f4ea;
+    color: #0a6b2e;
+    font-weight: bold;
+}
+
+.monoid-cayley td.zero-cell {
+    color: #bbb;
+}
+
+/* --- Диофантовы уравнения --- */
+
+.dioph-params {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+
+    margin-top: 6px;
+}
+
+.dioph-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.param-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    font-size: 13px;
+    color: #555;
+}
+
+.param-field span {
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-style: italic;
+}
+
+.param-field input {
+    width: 120px;
+    flex: none;
+}
+
+#diophantine-result .code-block,
+#congruence-result .code-block,
+#residue-result .code-block {
+    margin: 24px 0 0;
+}
+
+.dioph-steps {
+    margin: 0;
+    padding-left: 22px;
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.dioph-steps li + li {
+    margin-top: 4px;
+}
+
+.dioph-table td {
+    font-family: "Cambria Math", "Cambria", "Times New Roman", serif;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+}
+
+.dioph-table tr.highlight td {
+    background: #e6f4ea;
+    color: #0a6b2e;
+    font-weight: bold;
+}
+
+.dioph-table-wrap {
+    max-height: 420px;
+    overflow: auto;
+}
+
+#diophantine-result .monoid-check,
+#congruence-result .monoid-check,
+#residue-result .monoid-check {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.dioph-result-text {
+    font-family: "Cambria Math", "Times New Roman", serif;
+    font-size: 16px;
+}
+
+.param-field input[type="text"] {
+    width: 170px;
+}
+
+/* --- Шифр Эль-Гамаля --- */
+
+.elgamal-key-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+
+    margin-bottom: 30px;
+}
+
+.elgamal-key-row[hidden],
+#elgamal-section[hidden] {
+    display: none;
+}
+
+.elgamal-key-row .frequency-source-label {
+    align-self: center;
+}
+
+.elgamal-key-hint {
+    flex-basis: 100%;
+    text-align: center;
+}
+
+.elgamal-key-row .param-field input[type="text"] {
+    width: 220px;
+}
+
+.elgamal-key-row .elgamal-bits-field input {
+    width: 90px;
+}
+
+.dioph-table td.long-number {
+    min-width: 180px;
+    overflow-wrap: anywhere;
+}
+
+#elgamal-sections .code-block {
+    margin: 24px 0 0;
+}
+
+#elgamal-sections .monoid-check {
+    margin-top: 14px;
+    font-size: 14px;
+}

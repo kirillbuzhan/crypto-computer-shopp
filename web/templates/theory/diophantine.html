@@ -1,0 +1,125 @@
+{% extends "theory_base.html" %}
+
+{% block article %}
+<p class="lead">
+    Диофантовы уравнения — уравнения с целыми коэффициентами, решения которых ищут в целых числах. Названы в честь
+    Диофанта Александрийского (III век). Линейные диофантовы уравнения полностью решаются расширенным алгоритмом Евклида —
+    тем же, которым в криптографии вычисляют обратные элементы и секретный ключ RSA.
+</p>
+
+<h2>Линейное уравнение ax + by = c</h2>
+<div class="box theorem">
+    <span class="box-title">Теорема</span>
+    <p>
+        Пусть <span class="f">d = НОД(a, b)</span>. Уравнение <span class="f">ax + by = c</span> разрешимо в целых числах тогда и только тогда,
+        когда <span class="f">d | c</span>. Если <span class="f">(x_0, y_0)</span> — одно решение, то все решения имеют вид
+    </p>
+    <div class="f-block">x = x_0 + (b/d)·t,   y = y_0 − (a/d)·t,   t ∈ ℤ</div>
+</div>
+<p><b>Доказательство.</b></p>
+<ul>
+    <li><i>Необходимость:</i> <span class="f">d</span> делит <span class="f">a</span> и <span class="f">b</span>, значит, делит <span class="f">ax + by = c</span>.</li>
+    <li><i>Достаточность:</i> по соотношению Безу (ниже) есть <span class="f">s, t</span> с <span class="f">as + bt = d</span>. Умножив на <span class="f">c/d</span>, получаем решение
+        <span class="f">x_0 = s·c/d</span>, <span class="f">y_0 = t·c/d</span>.</li>
+    <li><i>Все решения:</i> если <span class="f">(x, y)</span> — тоже решение, то <span class="f">a(x − x_0) = −b(y − y_0)</span>. Разделив на <span class="f">d</span>, получим
+        <span class="f">(a/d)(x − x_0) = −(b/d)(y − y_0)</span>, а так как <span class="f">a/d</span> и <span class="f">b/d</span> взаимно просты, <span class="f">(b/d) | (x − x_0)</span>.</li>
+</ul>
+
+<h2>Расширенный алгоритм Евклида</h2>
+<div class="box theorem">
+    <span class="box-title">Соотношение Безу</span>
+    <p>Для любых целых <span class="f">a, b</span>, не равных нулю одновременно, существуют целые <span class="f">s, t</span>, такие что <span class="f">as + bt = НОД(a, b)</span>.</p>
+</div>
+<p>
+    Алгоритм Евклида заменяет пару <span class="f">(a, b)</span> на <span class="f">(b, a mod b)</span>, пока остаток не станет нулём; последний ненулевой
+    остаток — НОД. Расширенный вариант хранит для каждого остатка <span class="f">r_i</span> представление <span class="f">r_i = s_i·a + t_i·b</span> и пересчитывает
+    коэффициенты по тому же правилу, что и остатки: <span class="f">s_i = s_(i−2) − q_i·s_(i−1)</span>.
+</p>
+<div class="box example">
+    <span class="box-title">Пример: a = 240, b = 46</span>
+    <div class="table-scroll">
+        <table class="data-table center">
+            <thead><tr><th>i</th><th>rᵢ</th><th>qᵢ</th><th>sᵢ</th><th>tᵢ</th><th>проверка</th></tr></thead>
+            <tbody>
+                <tr><td>0</td><td>240</td><td>—</td><td>1</td><td>0</td><td>240 = 1·240 + 0·46</td></tr>
+                <tr><td>1</td><td>46</td><td>—</td><td>0</td><td>1</td><td>46 = 0·240 + 1·46</td></tr>
+                <tr><td>2</td><td>10</td><td>5</td><td>1</td><td>−5</td><td>240 − 5·46</td></tr>
+                <tr><td>3</td><td>6</td><td>4</td><td>−4</td><td>21</td><td>46 − 4·10</td></tr>
+                <tr><td>4</td><td>4</td><td>1</td><td>5</td><td>−26</td><td>10 − 6</td></tr>
+                <tr><td>5</td><td><b>2</b></td><td>1</td><td><b>−9</b></td><td><b>47</b></td><td>6 − 4</td></tr>
+                <tr><td>6</td><td>0</td><td>2</td><td colspan="3">остаток 0 — стоп</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        <span class="f">НОД(240, 46) = 2 = 240·(−9) + 46·47</span>. Решим <span class="f">240x + 46y = 10</span>: <span class="f">2 | 10</span>, умножаем на 5:
+        <span class="f">x_0 = −45</span>, <span class="f">y_0 = 235</span>. Все решения: <span class="f">x = −45 + 23t</span>, <span class="f">y = 235 − 120t</span>.
+    </p>
+</div>
+<p>
+    Число шагов алгоритма Евклида не больше примерно <span class="f">5·(число десятичных цифр меньшего числа)</span> (теорема Ламе); худший
+    случай — соседние числа Фибоначчи. Поэтому алгоритм быстр и для чисел из тысяч бит.
+</p>
+
+<h2>Линейные сравнения и обратные элементы</h2>
+<p>
+    Сравнение <span class="f">ax ≡ b (mod m)</span> равносильно уравнению <span class="f">ax − my = b</span>. Оно разрешимо тогда и только тогда, когда
+    <span class="f">НОД(a, m) | b</span>, и тогда имеет <span class="f">НОД(a, m)</span> решений по модулю <span class="f">m</span>. В частности, при <span class="f">НОД(a, m) = 1</span>
+    существует <b>обратный элемент</b> <span class="f">a⁻¹ mod m</span> — это коэффициент <span class="f">s</span> из <span class="f">as + mt = 1</span>.
+</p>
+<div class="box example">
+    <span class="box-title">Пример</span>
+    <p><span class="f">7x ≡ 3 (mod 10)</span>: <span class="f">7⁻¹ ≡ 3</span>, так как <span class="f">7·3 = 21 ≡ 1</span>. Значит, <span class="f">x ≡ 3·3 = 9 (mod 10)</span>; проверка: <span class="f">63 ≡ 3</span>.</p>
+</div>
+
+<h2>Применение: секретный ключ RSA</h2>
+<p>
+    В RSA выбирают простые <span class="f">p, q</span>, модуль <span class="f">n = pq</span>, <span class="f">φ(n) = (p − 1)(q − 1)</span> и открытую экспоненту <span class="f">e</span>,
+    взаимно простую с <span class="f">φ(n)</span>. Секретная экспонента <span class="f">d</span> — решение сравнения <span class="f">ed ≡ 1 (mod φ(n))</span>, то есть
+    диофантова уравнения <span class="f">ed − φ(n)·k = 1</span>.
+</p>
+<div class="box example">
+    <span class="box-title">Пример</span>
+    <p>
+        <span class="f">p = 61</span>, <span class="f">q = 53</span>: <span class="f">n = 3233</span>, <span class="f">φ = 3120</span>, <span class="f">e = 17</span>. Расширенный алгоритм Евклида даёт
+        <span class="f">d = 2753</span> (<span class="f">17·2753 = 46801 = 15·3120 + 1</span>). Сообщение <span class="f">M = 65</span> шифруется в
+        <span class="f">C = 65^17 mod 3233 = 2790</span>, и <span class="f">2790^2753 mod 3233 = 65</span>.
+    </p>
+</div>
+
+<h2>Другие классические задачи</h2>
+<h3>Размен монет</h3>
+<p>
+    Какие суммы можно набрать монетами номиналов <span class="f">a</span> и <span class="f">b</span>? Это уравнение <span class="f">ax + by = c</span> с <span class="f">x, y ≥ 0</span>.
+    При взаимно простых <span class="f">a, b</span> все суммы больше <span class="f">ab − a − b</span> набираются, а сама она — нет (теорема Сильвестра).
+    Например, монетами 3 и 5 нельзя набрать только 1, 2, 4 и 7.
+</p>
+<h3>Пифагоровы тройки</h3>
+<p>Все примитивные решения <span class="f">x² + y² = z²</span> (с <span class="f">НОД(x, y, z) = 1</span>) задаются формулами Евклида</p>
+<div class="f-block">x = m² − n²,   y = 2mn,   z = m² + n²,</div>
+<p>где <span class="f">m &gt; n &gt; 0</span> взаимно просты и разной чётности. При <span class="f">m = 2, n = 1</span> получаем (3, 4, 5), при <span class="f">m = 3, n = 2</span> — (5, 12, 13).</p>
+<h3>Предел возможностей</h3>
+<p>
+    Общего алгоритма для произвольных диофантовых уравнений не существует: это 10-я проблема Гильберта, отрицательно решённая
+    Ю. В. Матиясевичем в 1970 году. А уравнение <span class="f">x^n + y^n = z^n</span> при <span class="f">n &gt; 2</span> не имеет решений в натуральных числах —
+    Великая теорема Ферма, доказанная Эндрю Уайлсом в 1994 году.
+</p>
+
+<div class="box lab">
+    <span class="box-title">В лаборатории</span>
+    <p>
+        Пять примеров: <span class="f">ax + by = c</span>, линейное сравнение, ключ RSA, размен монет и пифагоровы тройки — с полной таблицей
+        расширенного алгоритма Евклида. <a href="{{ root }}/lab?algorithm=diophantine">Открыть →</a>
+    </p>
+</div>
+
+<h2>Вопросы для самопроверки</h2>
+<ol class="questions">
+    <li>Имеет ли решения уравнение <span class="f">6x + 9y = 20</span>?
+        <details class="answer"><summary>Ответ</summary>Нет: <span class="f">НОД(6, 9) = 3</span>, а 20 на 3 не делится.</details></li>
+    <li>Найдите <span class="f">11⁻¹ mod 26</span>.
+        <details class="answer"><summary>Ответ</summary><span class="f">26 = 2·11 + 4</span>, <span class="f">11 = 2·4 + 3</span>, <span class="f">4 = 3 + 1</span>; обратно: <span class="f">1 = 4 − 3 = 3·4 − 11 = 3·26 − 7·11</span>, значит <span class="f">11⁻¹ ≡ −7 ≡ 19</span> (<span class="f">11·19 = 209 = 8·26 + 1</span>).</details></li>
+    <li>Какую наибольшую сумму нельзя набрать монетами 5 и 7?
+        <details class="answer"><summary>Ответ</summary><span class="f">5·7 − 5 − 7 = 23</span>.</details></li>
+</ol>
+{% endblock %}

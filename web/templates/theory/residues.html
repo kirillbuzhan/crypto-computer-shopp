@@ -1,0 +1,161 @@
+{% extends "theory_base.html" %}
+
+{% block article %}
+<p class="lead">
+    Если отождествить все числа с одинаковым остатком, получится конечная алгебраическая система — кольцо вычетов
+    <span class="f">ℤₘ</span>. Его обратимые элементы образуют группу, в которой живут шифр Эль-Гамаля и протокол Диффи–Хеллмана,
+    а первообразные корни и дискретный логарифм — основа их стойкости.
+</p>
+
+<h2>Классы вычетов и кольцо ℤₘ</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        <b>Класс вычетов</b> числа <span class="f">a</span> по модулю <span class="f">m</span> — множество <span class="f">[a] = {a + km : k ∈ ℤ}</span> всех чисел,
+        сравнимых с <span class="f">a</span>. Любой элемент класса называется <b>вычетом</b>.
+    </p>
+</div>
+<ul>
+    <li><b>Полная система вычетов</b> — по одному представителю из каждого из <span class="f">m</span> классов, например <span class="f">0, 1, …, m − 1</span>.</li>
+    <li><b>Приведённая система вычетов</b> — представители классов, взаимно простых с <span class="f">m</span>.</li>
+</ul>
+<p>
+    Классы складываются и перемножаются через представителей: <span class="f">[a] + [b] = [a + b]</span>, <span class="f">[a]·[b] = [ab]</span> —
+    результат не зависит от выбора представителей (это и есть свойства <a href="{{ root }}/theory/congruences">сравнений</a>).
+    Получается коммутативное кольцо <span class="f">ℤₘ</span> из <span class="f">m</span> элементов.
+</p>
+
+<h2>Обратимые элементы и делители нуля</h2>
+<div class="box theorem">
+    <span class="box-title">Теорема</span>
+    <p>
+        Ненулевой класс <span class="f">[a] ∈ ℤₘ</span> обратим тогда и только тогда, когда <span class="f">НОД(a, m) = 1</span>. Иначе он — <b>делитель нуля</b>:
+        существует ненулевой <span class="f">[b]</span> с <span class="f">[a]·[b] = [0]</span>.
+    </p>
+</div>
+<p>
+    <b>Доказательство.</b> Если <span class="f">НОД(a, m) = 1</span>, по соотношению Безу <span class="f">as + mt = 1</span>, и <span class="f">[s]</span> — обратный. Если
+    <span class="f">d = НОД(a, m) &gt; 1</span>, то <span class="f">a·(m/d) = (a/d)·m ≡ 0</span>, причём <span class="f">m/d ≢ 0</span> — делитель нуля, а делитель нуля
+    обратимым быть не может.
+</p>
+<p>
+    Обратимые классы образуют группу <span class="f">ℤₘ*</span>. В <span class="f">ℤ_12</span>: обратимы 1, 5, 7, 11, делители нуля — 2, 3, 4, 6, 8, 9, 10
+    (например, <span class="f">3·4 = 12 ≡ 0</span>). Если <span class="f">m = p</span> простое, обратимы все ненулевые элементы: <span class="f">ℤₚ</span> — поле.
+</p>
+
+<h2>Функция Эйлера</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p><span class="f">φ(m)</span> — количество чисел от 1 до <span class="f">m</span>, взаимно простых с <span class="f">m</span>, то есть число элементов <span class="f">ℤₘ*</span>.</p>
+</div>
+<div class="box theorem">
+    <span class="box-title">Формулы</span>
+    <ul>
+        <li><span class="f">φ(p) = p − 1</span>, <span class="f">φ(p^k) = p^k − p^(k−1) = p^(k−1)·(p − 1)</span> для простого <span class="f">p</span>;</li>
+        <li><span class="f">φ(ab) = φ(a)·φ(b)</span> при <span class="f">НОД(a, b) = 1</span> (мультипликативность);</li>
+        <li>для <span class="f">m = p_1^(k_1)·…·p_s^(k_s)</span>: <span class="f">φ(m) = m·(1 − 1/p_1)·…·(1 − 1/p_s)</span>.</li>
+    </ul>
+</div>
+<p>
+    Среди чисел <span class="f">1, …, p^k</span> не взаимно просты с <span class="f">p^k</span> только кратные <span class="f">p</span> — их <span class="f">p^(k−1)</span>. Мультипликативность следует
+    из <a href="{{ root }}/theory/congruences">китайской теоремы</a>: <span class="f">ℤ_(ab)</span> соответствует парам (вычет mod <span class="f">a</span>, вычет mod <span class="f">b</span>),
+    и обратимым элементам — пары обратимых. Пример: <span class="f">φ(12) = 12·(1 − 1/2)·(1 − 1/3) = 4</span>.
+</p>
+
+<h2>Порядок элемента и первообразные корни</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        <b>Порядок</b> <span class="f">ord_m(a)</span> обратимого <span class="f">a</span> — наименьшее <span class="f">d &gt; 0</span> с <span class="f">a^d ≡ 1 (mod m)</span>.
+        Если <span class="f">ord_m(g) = φ(m)</span>, то <span class="f">g</span> — <b>первообразный корень</b> по модулю <span class="f">m</span>: его степени пробегают всю группу <span class="f">ℤₘ*</span>.
+    </p>
+</div>
+<div class="box theorem">
+    <span class="box-title">Свойства</span>
+    <ol>
+        <li><span class="f">a^n ≡ 1 ⇔ ord(a) | n</span>; в частности, <span class="f">ord(a) | φ(m)</span>.</li>
+        <li>Первообразные корни существуют только для <span class="f">m = 1, 2, 4, p^k, 2p^k</span> (<span class="f">p</span> — нечётное простое) — теорема Гаусса.
+            Если они есть, их ровно <span class="f">φ(φ(m))</span>.</li>
+        <li><b>Проверка:</b> <span class="f">g</span> — первообразный корень по модулю простого <span class="f">p</span> ⇔ <span class="f">g^((p−1)/q) ≢ 1 (mod p)</span> для каждого простого <span class="f">q | p − 1</span>.</li>
+    </ol>
+</div>
+<p>
+    <b>Почему работает проверка.</b> Порядок <span class="f">g</span> делит <span class="f">p − 1</span>. Если он меньше <span class="f">p − 1</span>, то он делит <span class="f">(p − 1)/q</span> для
+    некоторого простого <span class="f">q</span>, и тогда <span class="f">g^((p−1)/q) ≡ 1</span>. Поэтому для проверки нужно знать <b>разложение <span class="f">p − 1</span></b> —
+    для больших <span class="f">p</span> лаборатория получает его вместе с <a href="{{ root }}/theory/primality">доказательством простоты</a>.
+</p>
+<div class="box example">
+    <span class="box-title">Пример: m = 7</span>
+    <div class="table-scroll">
+        <table class="data-table center">
+            <thead><tr><th>k</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>порядок</th></tr></thead>
+            <tbody>
+                <tr><td><span class="f">2^k</span></td><td>2</td><td>4</td><td>1</td><td>2</td><td>4</td><td>1</td><td>3</td></tr>
+                <tr><td><span class="f">3^k</span></td><td>3</td><td>2</td><td>6</td><td>4</td><td>5</td><td>1</td><td><b>6</b></td></tr>
+                <tr><td><span class="f">6^k</span></td><td>6</td><td>1</td><td>6</td><td>1</td><td>6</td><td>1</td><td>2</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <p>
+        3 — первообразный корень: его степени дают все ненулевые вычеты. Всего первообразных корней <span class="f">φ(6) = 2</span> — это 3 и 5.
+        Проверка по критерию: <span class="f">6 = 2·3</span>, <span class="f">3^3 = 27 ≡ 6 ≢ 1</span>, <span class="f">3^2 = 9 ≡ 2 ≢ 1</span>.
+    </p>
+</div>
+
+<h2>Дискретный логарифм</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        Если <span class="f">g</span> — первообразный корень, каждое <span class="f">y ∈ ℤₘ*</span> равно <span class="f">g^x</span> для единственного <span class="f">x</span> из <span class="f">0, …, φ(m) − 1</span>.
+        Это <span class="f">x</span> — <b>дискретный логарифм</b> (индекс) <span class="f">y</span> по основанию <span class="f">g</span>.
+    </p>
+</div>
+<p>
+    Он обладает свойствами обычного логарифма по модулю <span class="f">φ(m)</span>: <span class="f">log(ab) ≡ log a + log b</span>. Вычислять <span class="f">g^x</span> легко,
+    а находить <span class="f">x</span> — трудно: перебор требует до <span class="f">p − 1</span> шагов.
+</p>
+<h3>Алгоритм «шаг младенца — шаг великана» (Шенкс)</h3>
+<p>
+    Положим <span class="f">n = ⌈√(p − 1)⌉</span> и будем искать <span class="f">x = i·n + j</span>, <span class="f">0 ≤ i, j &lt; n</span>. Условие <span class="f">g^(in+j) = y</span>
+    равносильно <span class="f">y·(g^(−n))^i = g^j</span>.
+</p>
+<ol>
+    <li><b>Шаги младенца:</b> вычислить и запомнить в таблице <span class="f">g^j</span> для <span class="f">j = 0, …, n − 1</span>.</li>
+    <li><b>Шаги великана:</b> вычислять <span class="f">γ_i = y·(g^(−n))^i</span> для <span class="f">i = 0, 1, …</span>, пока <span class="f">γ_i</span> не найдётся в таблице.</li>
+</ol>
+<p>Время и память — <span class="f">O(√p)</span>: для 1024-битного <span class="f">p</span> это около <span class="f">2^512</span> операций, то есть по-прежнему невозможно.</p>
+<div class="box example">
+    <span class="box-title">Пример: 3^x ≡ 5 (mod 7)</span>
+    <p>
+        <span class="f">n = ⌈√6⌉ = 3</span>. Шаги младенца: <span class="f">3^0 = 1</span>, <span class="f">3^1 = 3</span>, <span class="f">3^2 = 2</span>.
+        <span class="f">g^(−3) = 6⁻¹ = 6 (mod 7)</span>. Шаги великана: <span class="f">γ_0 = 5</span> — нет в таблице; <span class="f">γ_1 = 5·6 = 30 ≡ 2 = 3^2</span>.
+        Значит, <span class="f">x = 1·3 + 2 = 5</span>. Проверка: <span class="f">3^5 = 243 ≡ 5 (mod 7)</span>.
+    </p>
+</div>
+<div class="box warning">
+    <span class="box-title">Алгоритм Полига–Хеллмана</span>
+    <p>
+        Если <span class="f">p − 1</span> раскладывается только на малые простые, дискретный логарифм вычисляется быстро — задача распадается на
+        логарифмы в маленьких подгруппах. Поэтому в криптографии <span class="f">p − 1</span> обязательно должно иметь большой простой делитель.
+        В генераторе лаборатории это выполняется автоматически: <span class="f">p − 1 = R·q</span>, где простое <span class="f">q</span> имеет примерно половину длины <span class="f">p</span>.
+    </p>
+</div>
+
+<div class="box lab">
+    <span class="box-title">В лаборатории</span>
+    <p>
+        Пять примеров: классы вычетов, приведённая система и <span class="f">φ(m)</span>, обратимые элементы и делители нуля, порядок и первообразные
+        корни, дискретный логарифм методом Шенкса. <a href="{{ root }}/lab?algorithm=residues">Открыть →</a>
+    </p>
+</div>
+
+<h2>Вопросы для самопроверки</h2>
+<ol class="questions">
+    <li>Вычислите <span class="f">φ(100)</span>.
+        <details class="answer"><summary>Ответ</summary><span class="f">100 = 2^2·5^2</span>, <span class="f">φ = 100·(1/2)·(4/5) = 40</span>.</details></li>
+    <li>Найдите все первообразные корни по модулю 11, если известно, что 2 — один из них.
+        <details class="answer"><summary>Ответ</summary>Это <span class="f">2^k</span> при <span class="f">НОД(k, 10) = 1</span>: <span class="f">k = 1, 3, 7, 9</span> → 2, 8, 7, 6.</details></li>
+    <li>Почему по модулю 8 нет первообразных корней?
+        <details class="answer"><summary>Ответ</summary><span class="f">ℤ_8* = {1, 3, 5, 7}</span>, и квадрат каждого элемента равен 1: максимальный порядок 2, а <span class="f">φ(8) = 4</span>.</details></li>
+</ol>
+{% endblock %}

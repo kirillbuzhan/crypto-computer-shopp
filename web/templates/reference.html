@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Справочник — {{ site.title }}{% endblock %}
+{% block description %}Глоссарий терминов, сводка формул, обозначения и список литературы по теории информации, кодированию и криптографии.{% endblock %}
+
+{% block content %}
+<main class="page">
+    <div class="page-head">
+        <h1>Справочник</h1>
+        <p class="lead">Термины, формулы и обозначения, которые встречаются в статьях и в лаборатории, — в одном месте.</p>
+    </div>
+
+    <nav class="reference-nav" aria-label="Разделы справочника">
+        <a class="chip" href="#glossary">Глоссарий</a>
+        <a class="chip" href="#formulas">Формулы</a>
+        <a class="chip" href="#notation">Обозначения</a>
+        <a class="chip" href="#literature">Литература</a>
+    </nav>
+
+    <article class="article" style="max-width: none;">
+        <h2 id="glossary">Глоссарий</h2>
+
+        <label for="glossary-filter" class="box-title">Поиск по терминам</label>
+        <input type="search" id="glossary-filter" class="glossary-filter" placeholder="Например: синдром, вычет, энтропия">
+
+        <dl class="glossary">
+            {% for term, definition, slug in glossary %}
+            <div class="glossary-entry">
+                <dt>{{ term }}</dt>
+                <dd>
+                    <span class="f-text">{{ definition }}</span>
+                    {% if slug %}<a href="{{ root }}/theory/{{ slug }}">→ статья</a>{% endif %}
+                </dd>
+            </div>
+            {% endfor %}
+        </dl>
+
+        <h2 id="formulas">Сводка формул</h2>
+        {% for section_title, items in formulas %}
+        <h3>{{ section_title }}</h3>
+        <div class="table-scroll">
+            <table class="data-table">
+                <tbody>
+                    {% for name, formula in items %}
+                    <tr>
+                        <td style="width: 38%;">{{ name }}</td>
+                        <td><span class="f">{{ formula }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+
+        <h2 id="notation">Обозначения</h2>
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr><th style="width: 30%;">Запись</th><th>Смысл</th></tr>
+                </thead>
+                <tbody>
+                    {% for symbol, meaning in notation %}
+                    <tr>
+                        <td><span class="f">{{ symbol }}</span></td>
+                        <td>{{ meaning }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h2 id="literature">Литература</h2>
+        {% for section_title, items in literature %}
+        <h3>{{ section_title }}</h3>
+        <ol class="literature">
+            {% for text, url in items %}
+            <li>{{ text }}{% if url %} <a href="{{ url }}" rel="noopener">{{ url }}</a>{% endif %}</li>
+            {% endfor %}
+        </ol>
+        {% endfor %}
+    </article>
+</main>
+{% endblock %}

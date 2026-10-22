@@ -1,0 +1,134 @@
+{% extends "theory_base.html" %}
+
+{% block article %}
+<p class="lead">
+    Сравнения по модулю — «арифметика остатков», придуманная Гауссом (1801). Вся асимметричная криптография —
+    RSA, Диффи–Хеллман, Эль-Гамаль — это вычисления в остатках: быстрое возведение в степень, теоремы Ферма и Эйлера,
+    китайская теорема об остатках.
+</p>
+
+<h2>Определение и свойства</h2>
+<div class="box definition">
+    <span class="box-title">Определение</span>
+    <p>
+        Целые <span class="f">a</span> и <span class="f">b</span> <b>сравнимы по модулю</b> <span class="f">m &gt; 0</span>, если <span class="f">m | (a − b)</span>, то есть они дают одинаковые
+        остатки при делении на <span class="f">m</span>. Записывают <span class="f">a ≡ b (mod m)</span>.
+    </p>
+</div>
+<p>Сравнение — отношение эквивалентности, и с ним можно обращаться почти как с равенством. Если <span class="f">a ≡ b</span> и <span class="f">c ≡ d (mod m)</span>, то</p>
+<ul>
+    <li><span class="f">a + c ≡ b + d</span>, <span class="f">a − c ≡ b − d</span>, <span class="f">ac ≡ bd (mod m)</span>;</li>
+    <li><span class="f">a^k ≡ b^k (mod m)</span> для любого натурального <span class="f">k</span>.</li>
+</ul>
+<p>
+    <b>Доказательство</b> для умножения: <span class="f">ac − bd = a(c − d) + d(a − b)</span> — сумма кратных <span class="f">m</span>.
+</p>
+<div class="box warning">
+    <span class="box-title">Делить можно не всегда</span>
+    <p>
+        <span class="f">2·3 ≡ 2·8 (mod 10)</span>, но <span class="f">3 ≢ 8 (mod 10)</span>. Сокращать на <span class="f">c</span> можно, только если <span class="f">НОД(c, m) = 1</span> — тогда
+        у <span class="f">c</span> есть <a href="{{ root }}/theory/diophantine">обратный элемент</a> по модулю <span class="f">m</span>.
+    </p>
+</div>
+
+<h2>Быстрое возведение в степень</h2>
+<p>
+    Чтобы вычислить <span class="f">a^k mod m</span>, не нужно <span class="f">k − 1</span> умножение. Запишем <span class="f">k</span> в двоичной системе, будем последовательно
+    возводить <span class="f">a</span> в квадрат (<span class="f">a, a^2, a^4, a^8, …</span> по модулю <span class="f">m</span>) и перемножать те квадраты, которым соответствуют
+    единицы. Получается не больше <span class="f">2·log₂ k</span> умножений, а промежуточные числа не превышают <span class="f">m²</span>.
+</p>
+<div class="box example">
+    <span class="box-title">Пример: 3^13 mod 7</span>
+    <p>
+        <span class="f">13 = 1101₂ = 8 + 4 + 1</span>. Квадраты: <span class="f">3^1 = 3</span>, <span class="f">3^2 = 9 ≡ 2</span>, <span class="f">3^4 ≡ 2^2 = 4</span>, <span class="f">3^8 ≡ 4^2 = 16 ≡ 2</span>.
+        Итого <span class="f">3^13 ≡ 3^8·3^4·3^1 ≡ 2·4·3 = 24 ≡ 3 (mod 7)</span>.
+    </p>
+</div>
+<p>
+    Для 2048-битного показателя — около 4000 умножений вместо <span class="f">2^2048</span>. Без этого алгоритма RSA и Эль-Гамаль были бы невозможны.
+</p>
+
+<h2>Теоремы Ферма и Эйлера</h2>
+<div class="box theorem">
+    <span class="box-title">Теорема Эйлера</span>
+    <p>Если <span class="f">НОД(a, m) = 1</span>, то</p>
+    <div class="f-block">a^φ(m) ≡ 1 (mod m),</div>
+    <p>где <span class="f">φ(m)</span> — <a href="{{ root }}/theory/residues">функция Эйлера</a>. Частный случай для простого <span class="f">m = p</span> — <b>малая теорема Ферма</b>:
+        <span class="f">a^(p−1) ≡ 1 (mod p)</span> при <span class="f">p ∤ a</span>.</p>
+</div>
+<p>
+    <b>Доказательство.</b> Пусть <span class="f">r_1, …, r_φ</span> — приведённая система вычетов по модулю <span class="f">m</span>. Числа <span class="f">a·r_1, …, a·r_φ</span>
+    тоже взаимно просты с <span class="f">m</span> и попарно несравнимы (на <span class="f">a</span> можно сокращать), то есть это та же система в другом порядке.
+    Перемножив, получаем <span class="f">a^φ·∏r_i ≡ ∏r_i</span>, и после сокращения на обратимое <span class="f">∏r_i</span> — <span class="f">a^φ ≡ 1</span>.
+</p>
+<p>
+    <b>Следствие — понижение показателя:</b> <span class="f">a^k ≡ a^(k mod φ(m)) (mod m)</span>. Например, <span class="f">3^100 mod 7</span>: <span class="f">φ(7) = 6</span>,
+    <span class="f">100 mod 6 = 4</span>, <span class="f">3^4 = 81 ≡ 4</span>. Отсюда же — корректность RSA: <span class="f">(M^e)^d = M^(1 + kφ(n)) ≡ M (mod n)</span>.
+</p>
+
+<h2>Китайская теорема об остатках</h2>
+<div class="box theorem">
+    <span class="box-title">Теорема</span>
+    <p>
+        Если модули <span class="f">m_1, …, m_k</span> попарно взаимно просты, система <span class="f">x ≡ a_i (mod m_i)</span> имеет единственное решение по модулю
+        <span class="f">M = m_1·…·m_k</span>:
+    </p>
+    <div class="f-block">x = Σ a_i·M_i·y_i mod M,   M_i = M/m_i,   y_i = M_i⁻¹ mod m_i</div>
+</div>
+<p>
+    Слагаемое <span class="f">a_i·M_i·y_i</span> сравнимо с <span class="f">a_i</span> по модулю <span class="f">m_i</span> и с нулём по всем остальным модулям — поэтому сумма удовлетворяет
+    всем сравнениям сразу. Единственность: разность двух решений делится на все <span class="f">m_i</span>, а значит, и на <span class="f">M</span>.
+</p>
+<div class="box example">
+    <span class="box-title">Задача Сунь-цзы (III–V век)</span>
+    <p>
+        Число при делении на 3 даёт остаток 2, на 5 — 3, на 7 — 2. <span class="f">M = 105</span>; <span class="f">M_1 = 35</span>, <span class="f">35⁻¹ ≡ 2⁻¹ ≡ 2 (mod 3)</span>;
+        <span class="f">M_2 = 21</span>, <span class="f">21⁻¹ ≡ 1 (mod 5)</span>; <span class="f">M_3 = 15</span>, <span class="f">15⁻¹ ≡ 1 (mod 7)</span>.
+        <span class="f">x = 2·35·2 + 3·21·1 + 2·15·1 = 233 ≡ 23 (mod 105)</span>.
+    </p>
+</div>
+<p>
+    Китайская теорема позволяет заменить вычисления с огромным модулем несколькими вычислениями с маленькими. Так ускоряют
+    расшифрование RSA (примерно в 4 раза) — вычисляя степень отдельно по модулям <span class="f">p</span> и <span class="f">q</span>.
+</p>
+
+<h2>Квадратичные сравнения</h2>
+<p>
+    Число <span class="f">a</span>, не делящееся на простое нечётное <span class="f">p</span>, называется <b>квадратичным вычетом</b>, если сравнение <span class="f">x² ≡ a (mod p)</span>
+    разрешимо, и невычетом — иначе. Вычетов и невычетов поровну — по <span class="f">(p − 1)/2</span>.
+</p>
+<div class="box theorem">
+    <span class="box-title">Критерий Эйлера</span>
+    <div class="f-block">a^((p−1)/2) ≡ 1 (mod p) ⇔ a — квадратичный вычет;   ≡ −1 ⇔ невычет</div>
+</div>
+<p>
+    Если <span class="f">p ≡ 3 (mod 4)</span>, корень находится явно: <span class="f">x = ±a^((p+1)/4) mod p</span>. Действительно,
+    <span class="f">x² = a^((p+1)/2) = a·a^((p−1)/2) ≡ a</span>. Пример: <span class="f">x² ≡ 2 (mod 7)</span>: <span class="f">2^3 = 8 ≡ 1</span> — вычет,
+    <span class="f">x = 2^2 = 4</span>, корни 4 и 3.
+</p>
+
+<h2>Признаки делимости</h2>
+<p>
+    Признаки делимости — следствия сравнений для степеней 10. Так как <span class="f">10 ≡ 1 (mod 9)</span>, число сравнимо с суммой своих цифр
+    по модулю 9 (и 3). Так как <span class="f">10 ≡ −1 (mod 11)</span>, число сравнимо со знакочередующейся суммой цифр по модулю 11.
+    Для любого делителя <span class="f">m</span> остаток числа равен сумме цифр, умноженных на остатки <span class="f">10^i mod m</span>.
+</p>
+
+<div class="box lab">
+    <span class="box-title">В лаборатории</span>
+    <p>
+        Пять примеров: быстрое <span class="f">a^k mod m</span>, теоремы Эйлера и Ферма, китайская теорема, квадратичные сравнения и признаки
+        делимости. <a href="{{ root }}/lab?algorithm=congruences">Открыть →</a>
+    </p>
+</div>
+
+<h2>Вопросы для самопроверки</h2>
+<ol class="questions">
+    <li>Найдите последнюю цифру числа <span class="f">7^222</span>.
+        <details class="answer"><summary>Ответ</summary>Это <span class="f">7^222 mod 10</span>; <span class="f">φ(10) = 4</span>, <span class="f">222 mod 4 = 2</span>, <span class="f">7^2 = 49</span> — последняя цифра 9.</details></li>
+    <li>Решите систему <span class="f">x ≡ 1 (mod 4)</span>, <span class="f">x ≡ 2 (mod 9)</span>.
+        <details class="answer"><summary>Ответ</summary><span class="f">x ≡ 29 (mod 36)</span>: <span class="f">29 = 7·4 + 1 = 3·9 + 2</span>.</details></li>
+    <li>Является ли 3 квадратичным вычетом по модулю 11?
+        <details class="answer"><summary>Ответ</summary><span class="f">3^5 = 243 = 22·11 + 1 ≡ 1</span> — да; корни <span class="f">±3^3 = ±27 ≡ ±5</span>: <span class="f">5^2 = 25 ≡ 3</span>.</details></li>
+</ol>
+{% endblock %}

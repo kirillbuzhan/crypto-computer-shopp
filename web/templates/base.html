@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}{{ site.subtitle }}{% endblock %}">
+
+    <title>{% block title %}{{ site.title }}{% endblock %}</title>
+
+    <link rel="icon" href="{{ root }}/static/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ root }}/static/site.css?v={{ static_version }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body data-root="{{ root }}">
+
+    <a class="skip-link" href="#content">Перейти к содержанию</a>
+
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-brand" href="{{ root }}/">
+                <span class="site-brand-mark" aria-hidden="true">∑</span>
+                <span class="site-brand-text">{{ site.title }}</span>
+            </a>
+
+            <button class="nav-toggle" id="nav-toggle" type="button" aria-controls="site-nav" aria-expanded="false">
+                Меню
+            </button>
+
+            {% set section = current_path[root|length:] if current_path.startswith(root) else current_path %}
+            <nav class="site-nav" id="site-nav" aria-label="Основное меню">
+                <a href="{{ root }}/" {% if section in ('', '/') %}aria-current="page"{% endif %}>Главная</a>
+                <a href="{{ root }}/lab" {% if section.startswith('/lab') %}aria-current="page"{% endif %}>Лаборатория</a>
+                <a href="{{ root }}/theory" {% if section.startswith('/theory') %}aria-current="page"{% endif %}>Теория</a>
+                <a href="{{ root }}/reference" {% if section.startswith('/reference') %}aria-current="page"{% endif %}>Справочник</a>
+                <a href="{{ root }}/about" {% if section.startswith('/about') %}aria-current="page"{% endif %}>О проекте</a>
+            </nav>
+        </div>
+    </header>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+            <div>
+                <b>{{ site.title }}</b>
+                {% if site.organization %}<br>{{ site.organization }}{% endif %}
+                {% if site.authors %}<br>Авторы: {{ site.authors }}{% endif %}
+                {% if site.email %}<br><a href="mailto:{{ site.email }}">{{ site.email }}</a>{% endif %}
+            </div>
+            <nav class="footer-nav" aria-label="Разделы">
+                <a href="{{ root }}/lab">Лаборатория</a>
+                <a href="{{ root }}/theory">Теория</a>
+                <a href="{{ root }}/reference#glossary">Глоссарий</a>
+                <a href="{{ root }}/reference#literature">Литература</a>
+                <a href="{{ root }}/about">О проекте</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="{{ root }}/static/common.js?v={{ static_version }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
