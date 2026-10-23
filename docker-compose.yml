@@ -2,10 +2,17 @@ services:
   web:
     build: .
     image: crypto-lab:latest
+    container_name: crypto-lab
     restart: unless-stopped
     ports:
-      # Наружу открыт только локальный порт: снаружи сайт обслуживает nginx (deploy/nginx.conf).
-      - "127.0.0.1:8000:8000"
+      # BIND_ADDRESS=0.0.0.0 — сайт доступен снаружи напрямую по порту 3250;
+      # BIND_ADDRESS=127.0.0.1 — только для nginx на этом же сервере (deploy/nginx.conf).
+      - "${BIND_ADDRESS:-0.0.0.0}:3250:3250"
     env_file:
       - path: .env
         required: false
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

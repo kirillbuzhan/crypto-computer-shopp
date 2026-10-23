@@ -38,13 +38,32 @@ pytest
 
 ### Docker (рекомендуется)
 
+На любом Linux-сервере — одна команда (Docker установится автоматически, если его нет):
+
 ```bash
-cp .env.example .env          # при необходимости поправить настройки
-docker compose up -d --build  # сайт на 127.0.0.1:8000
+git clone https://github.com/kirillbuzhan/crypto-computer-shopp /opt/crypto-lab
+cd /opt/crypto-lab && sudo ./deploy.sh   # сайт на http://<сервер>:3250
+```
+
+Повторный запуск `./deploy.sh` обновляет сайт: `git pull`, пересборка образа, перезапуск контейнера,
+проверка `/healthz`. Настройки — в `.env` (создаётся из `.env.example` при первом запуске).
+
+Вручную то же самое:
+
+```bash
+cp .env.example .env
+docker compose up -d --build             # сайт на порту 3250
 ```
 
 Контейнер работает от непривилегированного пользователя, имеет healthcheck (`/healthz`) и перезапускается автоматически.
-Наружу порт открыт только на `127.0.0.1` — публикует сайт обратный прокси (nginx), он же отвечает за HTTPS.
+По умолчанию порт 3250 открыт наружу (`BIND_ADDRESS=0.0.0.0`). Если сайт публикует nginx с HTTPS на этом же сервере,
+задайте в `.env` `BIND_ADDRESS=127.0.0.1` — тогда порт доступен только локально.
+
+#### Кнопка в GitHub Actions
+
+Workflow [.github/workflows/deploy.yml](.github/workflows/deploy.yml) запускается кнопкой
+**Actions → Deploy → Run workflow**: прогоняет тесты, заходит на сервер по SSH и выполняет `deploy.sh`.
+Нужно один раз добавить секреты `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` (и при желании `DEPLOY_PATH`).
 
 ### Без Docker (systemd)
 

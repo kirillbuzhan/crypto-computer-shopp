@@ -16,7 +16,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/opt/crypto-lab
 EnvironmentFile=-/opt/crypto-lab/.env
-ExecStart=/opt/crypto-lab/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000 --proxy-headers
+ExecStart=/opt/crypto-lab/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 3250 --proxy-headers
 Restart=on-failure
 RestartSec=3
 
