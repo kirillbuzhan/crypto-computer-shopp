@@ -6,6 +6,7 @@ from transmission.prefix_tree import (
     build_codes,
     decode_with_codes,
     encode_with_codes,
+    prune_tree,
     serialize_tree,
 )
 
@@ -46,8 +47,10 @@ class ShannonFanoCoder:
         """Закодировать сообщение, вернуть биты, таблицу кодов, дерево и трассировку по символам.
 
         Если frequencies не задан, вес символа — число его вхождений в само
-        сообщение. Если задан (например, из frequency.json) — используется
-        он, но только для символов, реально встретившихся в сообщении.
+        сообщение. Если задан (например, из frequency.json) — дерево
+        строится по всему алфавиту таблицы, а в ответ попадают только
+        символы сообщения: их коды, частоты и ветви дерева. Все символы
+        сообщения должны быть в таблице.
         """
         if not message:
             return {"encoded": "", "codes": {}, "frequencies": {}, "steps": [], "tree": None}
@@ -58,17 +61,25 @@ class ShannonFanoCoder:
             char_freqs = frequencies
 
         # Сортировка по убыванию частоты; при равных частотах порядок
-        # символов стабилен и совпадает с порядком их первого появления.
+        # символов стабилен: порядок первого появления в сообщении
+        # или порядок в переданной таблице частот.
         symbols = sorted(char_freqs.items(), key=lambda item: item[1], reverse=True)
 
         root = self._build_tree(symbols)
         codes = build_codes(root)
         bits, steps = encode_with_codes(message, codes)
 
+        # Код построен по всему алфавиту таблицы, а показываем только
+        # символы сообщения: их коды, частоты и ветви дерева.
+        used = set(message)
+        if frequencies is not None:
+            root = prune_tree(root, used)
+
         return {
             "encoded": bits,
-            "codes": codes,
-            "frequencies": dict(char_freqs),
+            "codes": {char: code for char, code in codes.items() if char in used},
+            "frequencies": {char: freq for char, freq in char_freqs.items() if char in used},
+            "alphabet_size": len(char_freqs),
             "steps": steps,
             "tree": serialize_tree(root),
         }

@@ -36,6 +36,26 @@ def build_codes(root: Optional[TreeNode]) -> dict:
     return codes
 
 
+def prune_tree(node: Optional[TreeNode], keep: set) -> Optional[TreeNode]:
+    """Оставить в дереве только пути к листьям с символами из keep.
+
+    Нужен, когда код построен по большому алфавиту (frequency.json), а
+    показать надо лишь ветви символов сообщения. Коды оставшихся листьев
+    не меняются: у внутреннего узла может остаться один потомок, но
+    его ребро сохраняет свой бит (0 — влево, 1 — вправо).
+    """
+    if node is None:
+        return None
+    if node.is_leaf():
+        return node if node.char in keep else None
+
+    left = prune_tree(node.left, keep)
+    right = prune_tree(node.right, keep)
+    if left is None and right is None:
+        return None
+    return TreeNode(freq=node.freq, left=left, right=right)
+
+
 def serialize_tree(node: Optional[TreeNode]) -> Optional[dict]:
     """Превратить дерево в JSON-совместимую структуру для визуализации."""
     if node is None:

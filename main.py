@@ -47,8 +47,10 @@ app.mount(
 
 templates = Jinja2Templates(directory=config.TEMPLATES_DIR)
 
+# Таблица упорядочена по символам: при равных частотах дерево строится
+# одинаково на любом сервере, независимо от порядка ключей в файле.
 with config.FREQUENCY_FILE.open("r", encoding="utf-8") as frequency_file:
-    FREQUENCY_TABLE: dict = json.load(frequency_file)
+    FREQUENCY_TABLE: dict = dict(sorted(json.load(frequency_file).items()))
 
 
 SECURITY_HEADERS = {
@@ -125,33 +127,29 @@ def _message_from(data: dict, limit: int) -> str:
     return message
 
 
-def resolve_frequencies(message: str, frequency_source: str) -> tuple[dict | None, list[str]]:
+def resolve_frequencies(message: str, frequency_source: str) -> dict | None:
     """Определить таблицу частот для кодирования по выбранному источнику.
 
     "message" — вес символа = число его вхождений в само сообщение
-    (по умолчанию, как и раньше); функция возвращает None, чтобы кодер
-    сам посчитал частоты по тексту.
+    (по умолчанию); функция возвращает None, чтобы кодер сам посчитал
+    частоты по тексту.
 
-    "file" — вес символа берётся из frequency.json (статистика по внешнему
-    тексту). Таблица всё равно ограничена символами, реально встретившимися
-    в сообщении — иначе не для чего строить коды. Если какого-то символа
-    в файле нет, ему присваивается вес 1, а сам символ попадает в список
-    "недостающих", который возвращается вторым элементом.
+    "file" — вся таблица frequency.json: код строится по полному алфавиту
+    файла, поэтому одинаковый текст кодируется одинаково у всех. Символы,
+    которых в файле нет, закодировать нельзя — это ошибка ввода.
     """
     if frequency_source != "file":
-        return None, []
+        return None
 
-    unique_chars = []
-    seen = set()
-    for char in message:
-        if char not in seen:
-            seen.add(char)
-            unique_chars.append(char)
+    invalid_chars = sorted(set(message) - FREQUENCY_TABLE.keys())
+    if invalid_chars:
+        shown = ", ".join("␣" if char == " " else repr(char) for char in invalid_chars)
+        raise InputError(
+            f"Недопустимые символы для частот из frequency.json: {shown}. "
+            "Разрешены русские буквы, цифры, пробел и знаки . , ; : ! ? - ( ) \" '"
+        )
 
-    missing_chars = [char for char in unique_chars if char not in FREQUENCY_TABLE]
-    frequencies = {char: FREQUENCY_TABLE.get(char, 1) for char in unique_chars}
-
-    return frequencies, missing_chars
+    return FREQUENCY_TABLE
 
 
 # --- Страницы ---
@@ -242,8 +240,9 @@ async def transmit(data: dict):
     if algorithm == "elgamal":
         return _transmit_elgamal(message, data, encoder, decoder, receiver)
 
-    frequency_source = data.get("frequency_source", "message")
-    frequencies, missing_chars = resolve_frequencies(message, frequency_source)
+    # Частоты из файла имеют смысл только для префиксных кодов.
+    frequency_source = data.get("frequency_source", "message") if algorithm in ("huffman", "shannon") else "message"
+    frequencies = resolve_frequencies(message, frequency_source)
 
     encode_result = encoder.encode(message, algorithm=algorithm, frequencies=frequencies)
     decode_result = decoder.decode(
@@ -258,7 +257,7 @@ async def transmit(data: dict):
         {
             "algorithm": algorithm,
             "frequency_source": frequency_source,
-            "frequency_missing_chars": missing_chars,
+            "alphabet_size": encode_result.get("alphabet_size", 0),
             "source": message,
             "encoded": encode_result["encoded"],
             "decoded": decode_result["decoded"],

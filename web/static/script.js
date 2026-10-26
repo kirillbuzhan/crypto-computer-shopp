@@ -760,12 +760,12 @@ function renderHammingVisualization(data) {
 function renderCodeVisualization(data) {
     codeSectionTitle.textContent = `Визуализация: ${ALGORITHM_LABELS[data.algorithm] || data.algorithm}`;
 
-    if (data.frequency_missing_chars && data.frequency_missing_chars.length > 0) {
-        const chars = data.frequency_missing_chars
-            .map((char) => (char === " " ? "␣" : char))
-            .join(", ");
+    if (data.frequency_source === "file" && data.alphabet_size) {
+        const usedCount = Object.keys(data.codes).length;
         frequencyNote.textContent =
-            `В frequency.json нет данных для символов: ${chars} — им присвоен вес 1.`;
+            `Код построен по всем ${data.alphabet_size} символам frequency.json — одинаковый текст ` +
+            `всегда кодируется одинаково. Показана часть дерева для ${usedCount} символов сообщения; ` +
+            `в узлах — частоты полного дерева.`;
         frequencyNote.hidden = false;
     } else {
         frequencyNote.hidden = true;

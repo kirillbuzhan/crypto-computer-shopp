@@ -7,6 +7,7 @@ from transmission.prefix_tree import (
     build_codes,
     decode_with_codes,
     encode_with_codes,
+    prune_tree,
     serialize_tree,
 )
 
@@ -47,11 +48,12 @@ class HuffmanCoder:
         """Закодировать сообщение, вернуть биты, таблицу кодов, дерево и трассировку по символам.
 
         Если frequencies не задан, вес каждого символа — число его вхождений
-        в само сообщение (как раньше). Если задан — используется он: это
-        позволяет строить дерево по внешней статистике (например, из
-        frequency.json), а не по конкретному переданному тексту. В любом
-        случае таблица включает только символы, реально встретившиеся
-        в сообщении — иначе не для чего строить коды.
+        в само сообщение (как раньше). Если задан — дерево строится по
+        всему алфавиту этой таблицы (например, frequency.json), и коды
+        не зависят от текста: одинаковое сообщение всегда кодируется
+        одинаково. Все символы сообщения должны быть в таблице. При равных
+        частотах решает порядок символов в таблице. В ответ попадают
+        только символы сообщения: их коды, частоты и ветви дерева.
         """
         if not message:
             return {"encoded": "", "codes": {}, "frequencies": {}, "steps": [], "tree": None}
@@ -65,10 +67,17 @@ class HuffmanCoder:
         codes = build_codes(root)
         bits, steps = encode_with_codes(message, codes)
 
+        # Код построен по всему алфавиту таблицы, а показываем только
+        # символы сообщения: их коды, частоты и ветви дерева.
+        used = set(message)
+        if frequencies is not None:
+            root = prune_tree(root, used)
+
         return {
             "encoded": bits,
-            "codes": codes,
-            "frequencies": dict(char_freqs),
+            "codes": {char: code for char, code in codes.items() if char in used},
+            "frequencies": {char: freq for char, freq in char_freqs.items() if char in used},
+            "alphabet_size": len(char_freqs),
             "steps": steps,
             "tree": serialize_tree(root),
         }

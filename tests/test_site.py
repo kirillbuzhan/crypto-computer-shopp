@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 import config
 from content.topics import LAB_THEORY, TOPICS, TOPICS_BY_SLUG
-from main import app
+from main import FREQUENCY_TABLE, app
 
 client = TestClient(app)
 HTML = {"accept": "text/html"}
@@ -77,3 +77,22 @@ def test_root_path_with_and_without_prefix_stripping(monkeypatch, prefix_in_path
     assert 'href="/crypto-lab/static/site.css' in page.text
     assert proxied.get(f"{prefix}/static/site.css").status_code == 200
     assert proxied.post(f"{prefix}/transmit", json={"algorithm": "reverse", "message": "abc"}).json()["encoded"] == "cba"
+
+
+@pytest.mark.parametrize("algorithm", ["huffman", "shannon"])
+def test_file_frequencies_use_full_alphabet(algorithm):
+    def send(message):
+        return client.post("/transmit", json={"algorithm": algorithm, "message": message, "frequency_source": "file"})
+
+    first = send("Привет, мир!").json()
+    assert first["decoded"] == "Привет, мир!"
+    assert first["alphabet_size"] == len(FREQUENCY_TABLE)
+    assert set(first["codes"]) == set("Привет, мир!")
+
+    # Коды символа не зависят от остального текста — дерево строится по всему файлу.
+    second = send("мир").json()
+    assert {char: first["codes"][char] for char in "мир"} == second["codes"]
+
+    response = send("Hello мир")
+    assert response.status_code == 400
+    assert "'H'" in response.json()["error"]

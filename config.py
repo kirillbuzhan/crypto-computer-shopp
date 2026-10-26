@@ -43,4 +43,4 @@ MAX_MESSAGE_LENGTH = _env_int("MAX_MESSAGE_LENGTH", 500)
 MAX_ELGAMAL_MESSAGE_LENGTH = _env_int("MAX_ELGAMAL_MESSAGE_LENGTH", 200)
 
 # Версия статики: меняется при обновлении, чтобы браузеры не держали старые файлы.
-STATIC_VERSION = _env("STATIC_VERSION", "16")
+STATIC_VERSION = _env("STATIC_VERSION", "17")
